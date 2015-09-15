@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from webtest import TestApp
 
 from reviewqueue import main
+from reviewqueue.db import DB
 from reviewqueue.models import DBSession
 from reviewqueue.models import Base  # base declarative object
 
@@ -31,6 +32,15 @@ class BaseTestCase(unittest.TestCase):
         DBSession.configure(bind=connection)
         self.session = self.Session(bind=connection)
         Base.session = self.session
+
+        self._create_test_data()
+
+    def _create_test_data(self):
+        db = DB()
+        self.user = db.create_user(nickname='tester')
+        self.review = db.create_review(
+            self.user, source_url='cs:trusty/meteor')
+        db.flush()
 
     def tearDown(self):
         # rollback - everything that happened with the
