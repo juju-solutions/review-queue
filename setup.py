@@ -18,15 +18,14 @@ requires = [
     'pyramid_debugtoolbar',
     'pyramid_tm',
     'pyyaml',
-    'requests',
+    'requests==2.6.0',
     'sqlalchemy',
     'sqlalchemy-utils',
+    'theblues',
     'transaction',
     'zope.sqlalchemy',
     'velruse',
     'waitress',
-    # test reqs
-    'tox',
     ]
 
 setup(

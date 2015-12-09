@@ -17,10 +17,15 @@ test: .venv
 	$(PYHOME)/tox
 
 .venv:
+	# install deps for theblues (https://github.com/juju/theblues#installation)
+	sudo add-apt-repository ppa:yellow/ppa -y
+	sudo apt-get update -qy
+	sudo apt-get install -qy libmacaroons0 python-macaroons libsodium13
+	# create virtualenv, install app deps
 	sudo apt-get install -qy python-virtualenv libpq-dev python-dev
-	virtualenv .venv
-	$(PYHOME)/pip install -U pip setuptools tox
-	$(PYHOME)/pip install -e .
+	virtualenv .venv --system-site-packages
+	$(PYHOME)/pip install --ignore-installed -U pip setuptools tox
+	$(PYHOME)/pip install --ignore-installed -e .
 
 serve: .venv
 	$(PYHOME)/initialize_db development.ini
