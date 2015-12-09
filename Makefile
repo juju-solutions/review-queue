@@ -19,7 +19,7 @@ test: .venv
 .venv:
 	sudo apt-get install -qy python-virtualenv libpq-dev python-dev
 	virtualenv .venv
-	$(PYHOME)/pip install -U pip setuptools
+	$(PYHOME)/pip install -U pip setuptools tox
 	$(PYHOME)/pip install -e .
 
 serve: .venv

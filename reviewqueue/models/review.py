@@ -49,6 +49,23 @@ class Review(Base):
     def age(self):
         return datetime.datetime.utcnow() - self.created_at
 
+    def start_tests(self, test_environments):
+        """Kick off tests for this review.
+
+        Makes http request(s) to a remote jenkins server to initiate tests.
+        When the tests finish, our app is called back via http with the
+        results.
+
+        """
+        for env in test_environments:
+            pass
+
+    def reject(self):
+        pass
+
+    def accept(self):
+        pass
+
 
 class Vote(Base):
     review_id = Column(Integer, ForeignKey('review.id'))

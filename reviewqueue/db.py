@@ -36,18 +36,12 @@ class DB(object):
             M.Vote(user=user, vote=vote))
 
         if review.score <= review.MIN_SCORE:
-            self.reject_review(review)
+            review.reject()
 
         if review.score >= review.MAX_SCORE:
-            self.accept_review(review)
+            review.accept()
 
         return True
-
-    def reject_review(self, review):
-        pass
-
-    def accept_review(self, review):
-        pass
 
     def get_user(self, **kw):
         return self._get_object(M.User, **kw)
