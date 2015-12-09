@@ -25,9 +25,9 @@ def make_enum(name, *fields):
 Status = make_enum(
     'Status',
 
-    'TESTING',
-    'PENDING',
-    'REVIEWED',
+    'NEEDS_REVIEW',
+    'NEEDS_FIXING',
+    'APPROVED',
     'PROMULGATED',
     'CLOSED',
 )

@@ -22,7 +22,7 @@ class DB(object):
 
     def create_review(self, user, **kw):
         review = M.Review(**kw)
-        review.status = M.Status.TESTING
+        review.status = M.Status.NEEDS_REVIEW
         user.reviews.append(review)
         return review
 
