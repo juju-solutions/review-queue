@@ -10,6 +10,7 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
 
 requires = [
     'arrow',
+    'binaryornot',
     'cached_property',
     'jsonschema',
     'psycopg2',

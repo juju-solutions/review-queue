@@ -20,10 +20,23 @@ class DB(object):
         return self.session.query(M.Review) \
             .order_by(M.Review.created_at)
 
-    def create_review(self, user, **kw):
-        review = M.Review(**kw)
-        review.status = M.Status.NEEDS_REVIEW
+    def create_review(self, user, source_url, charmstore_entity, settings):
+        revision_urls = charmstore_entity['Meta']['revision-info']['Revisions']
+        review = M.Review(
+            source_url=source_url,
+            status=M.Status.NEEDS_REVIEW,
+        )
         user.reviews.append(review)
+
+        # get (at most) the first two revisions
+        for i, revision_url in enumerate(revision_urls):
+            revision = M.Revision(
+                revision_url=revision_url,
+            )
+            review.revisions.append(revision)
+            if i > 0:
+                break
+
         return review
 
     def vote_on_review(self, review, user, vote):

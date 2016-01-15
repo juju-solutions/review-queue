@@ -1,3 +1,20 @@
 form#login {
   margin: 0;
 }
+
+.diff {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.diff_next, .diff_header {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.diff_add {
+  background-color: #eaffea;
+}
+.diff_chg {
+  background-color: #ffefc6
+}
+.diff_sub {
+  background-color: #ffecec;
+}

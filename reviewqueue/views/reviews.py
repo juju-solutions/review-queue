@@ -1,8 +1,12 @@
 from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render_to_response
 from pyramid.security import Allow
 from pyramid.security import Authenticated
 from pyramid.security import Everyone
 from pyramid.view import view_config
+
+from theblues.charmstore import CharmStore
+from theblues.errors import EntityNotFound
 
 from ..db import DB
 
@@ -62,18 +66,21 @@ def index(request):
     renderer='reviews/new.mako',
     permission='create',
 )
-def new(request):
+def new(request, errors=None):
     """New Review form
 
     GET /reviews/new
 
     """
-    return {}
+    return {
+        'errors': errors,
+    }
 
 
 @view_config(
     route_name='reviews_create',
     permission='create',
+    request_method='POST',
 )
 def create(request):
     """Create New Review
@@ -81,10 +88,23 @@ def create(request):
     POST /reviews/create
 
     """
+    source_url = request.params['source_url']
+
+    cs = CharmStore(request.registry.settings['charmstore.api.url'])
+    try:
+        charmstore_entity = cs.entity(source_url)
+    except EntityNotFound:
+        return render_to_response(
+            'reviews/new.mako',
+            new(request, errors=['EntityNotFound']),
+            request=request)
+
     db = DB()
     db.create_review(
         request.user,
-        source_url=request.params['source_url'],
+        source_url,
+        charmstore_entity,
+        request.registry.settings,
     )
     return HTTPFound(location=request.route_url('reviews_index'))
 
