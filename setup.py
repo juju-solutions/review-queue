@@ -13,6 +13,7 @@ requires = [
     'binaryornot',
     'cached_property',
     'jsonschema',
+    'launchpadlib',
     'psycopg2',
     'pyramid',
     'pyramid_mako',
@@ -54,5 +55,6 @@ setup(
     main = reviewqueue:main
     [console_scripts]
     initialize_db = reviewqueue.scripts.initializedb:main
+    initialize_lp_creds = reviewqueue.helpers:get_lp
     """,
 )

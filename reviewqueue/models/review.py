@@ -2,10 +2,14 @@ import datetime
 import os
 import zipfile
 
+import requests
+
 from pyramid.security import Allow
 
 from sqlalchemy import (
+    Boolean,
     Column,
+    DateTime,
     Enum,
     ForeignKey,
     Integer,
@@ -13,6 +17,7 @@ from sqlalchemy import (
     )
 
 from sqlalchemy.orm import (
+    backref,
     relationship,
 )
 
@@ -47,22 +52,22 @@ class Review(Base):
 
     user = relationship('User')
     votes = relationship('Vote')
-    revisions = relationship('Revision')
+    revisions = relationship('Revision', backref='review')
 
     @property
     def age(self):
         return datetime.datetime.utcnow() - self.created_at
 
-    def start_tests(self, test_environments):
-        """Kick off tests for this review.
+    @property
+    def latest_revision(self):
+        #TODO use query instead
+        return self.revisions[0]
 
-        Makes http request(s) to a remote jenkins server to initiate tests.
-        When the tests finish, our app is called back via http with the
-        results.
-
-        """
-        for env in test_environments:
-            pass
+    def create_tests(self, settings, substrates=None):
+        if self.revisions:
+            self.revisions[0].create_tests(
+                settings, substrates
+            )
 
     def reject(self):
         pass
@@ -76,10 +81,108 @@ class Review(Base):
         return current_revision.get_diff(prior_revision, settings)
 
 
+class RevisionTest(Base):
+    revision_id = Column(Integer, ForeignKey('revision.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+
+    status = Column(Text)  # RETRY, PENDING, PASS, FAIL
+    substrate = Column(Text)
+    url = Column(Text)
+    finished = Column(DateTime)
+
+    user = relationship('User')
+
+    def send_ci_request(self, settings):
+        test_url = self.revision.get_test_url()
+        if not test_url:
+            return
+
+        req_url = settings['testing.jenkins_url']
+        callback_url = (
+            '{}/revision_tests/{}'.format(
+                settings['base_url'],
+                self.id,
+            )
+        )
+
+        req_params = {
+            'url': test_url,
+            'token': settings['testing.jenkins_token'],
+            'cause': 'Review Queue Ingestion',
+            'callback_url': callback_url,
+            'job_id': self.id,
+            'envs': self.substrate,
+        }
+
+        r = requests.get(req_url, params=req_params)
+
+        if r.status_code == requests.codes.ok:
+            self.status = 'PENDING'
+
+    def try_finish(self):
+        """Attempt to find a CI result for this ReviewTest
+        and update the ReviewTest accordingly.
+
+        Returns True if successful, else False.
+
+        """
+        if self.status != 'RUNNING' or not self.url:
+            return False
+
+        result_url = '{}artifact/results.json'.format(self.url)
+        try:
+            result_data = requests.get(result_url).json()
+        except:
+            return False
+
+        passed = all(
+            test.get('returncode', 0) == 0
+            for test in result_data.get('tests', {})
+        )
+        self.status = 'PASS' if passed else 'FAIL'
+        self.finished = datetime.datetime.strptime(
+            result_data['finished'],
+            '%Y-%m-%dT%H:%M:%SZ'
+        )
+
+        return True
+
+    def cancel(self):
+        self.status = 'CANCELED'
+        self.finished = datetime.datetime.utcnow()
+
+
 class Revision(Base):
     review_id = Column(Integer, ForeignKey('review.id'))
 
     revision_url = Column(Text)
+
+    tests = relationship(
+        'RevisionTest',
+        backref=backref('revision'),
+    )
+
+    def get_test_url(self):
+        return self.revision_url
+
+    def create_tests(self, settings, substrates=None):
+        substrates = (
+            substrates or
+            settings['testing.default_substrates'].split(',')
+        )
+        revision_tests = []
+        # so we can correlate by `created` time later
+        batch_time = datetime.datetime.utcnow()
+        for substrate in substrates:
+            revision_tests.append(RevisionTest(
+                status='RETRY',
+                substrate=substrate.strip(),
+                created_at=batch_time,
+            ))
+        self.tests.extend(revision_tests)
+
+        for revision_test in revision_tests:
+            revision_test.send_ci_request(settings)
 
     def archive_url(self, settings):
         revision_url = self.revision_url
@@ -131,6 +234,7 @@ class User(Base):
     nickname = Column(Text)
     fullname = Column(Text)
     email = Column(Text)
+    is_charmer = Column(Boolean)
 
     comments = relationship('Comment')
     reviews = relationship('Review')

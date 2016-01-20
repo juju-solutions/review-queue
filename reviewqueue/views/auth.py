@@ -41,7 +41,9 @@ def login_callback(request):
     if user:
         user.update(**user_data)
     else:
-        user = db.create_user(**user_data)
+        user = db.create_user(
+            request.registry.settings,
+            **user_data)
         db.flush()
 
     headers = remember(request, user.id)

@@ -59,4 +59,4 @@ target/
 # Custom
 .venv/
 **node_modules/
-cloudbenchmarksorg/static/react/js/.bundle.js
+lp-creds

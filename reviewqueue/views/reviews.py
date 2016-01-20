@@ -121,6 +121,10 @@ def show(request):
 
     """
     review = request.context
+
+    substrates = request.registry.settings.get('testing.substrates', '')
+    substrates = [s.strip() for s in substrates.split(',')]
     return {
         'review': review,
+        'substrates': substrates,
     }

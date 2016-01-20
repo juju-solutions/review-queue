@@ -1,3 +1,4 @@
+from . import helpers as h
 from . import models as M
 
 
@@ -20,6 +21,9 @@ class DB(object):
         return self.session.query(M.Review) \
             .order_by(M.Review.created_at)
 
+    def get_revision(self, **kw):
+        return self._get_object(M.Revision, **kw)
+
     def create_review(self, user, source_url, charmstore_entity, settings):
         revision_urls = charmstore_entity['Meta']['revision-info']['Revisions']
         review = M.Review(
@@ -37,6 +41,7 @@ class DB(object):
             if i > 0:
                 break
 
+        review.create_tests(settings)
         return review
 
     def vote_on_review(self, review, user, vote):
@@ -59,7 +64,14 @@ class DB(object):
     def get_user(self, **kw):
         return self._get_object(M.User, **kw)
 
-    def create_user(self, **kw):
+    def create_user(self, settings, **kw):
+        lp = h.get_lp()
+        lp_user = lp.load('{}/~{}'.format(
+            settings['launchpad.api.url'],
+            kw['nickname']),
+        )
+        kw['is_charmer'] = lp_user in lp.people['charmers'].members
+
         u = M.User(**kw)
         self.session.add(u)
         return u

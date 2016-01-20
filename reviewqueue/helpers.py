@@ -8,9 +8,20 @@ import arrow  # noqa
 import requests
 
 from binaryornot.check import is_binary
+from launchpadlib.launchpad import Launchpad
 from theblues.charmstore import CharmStore
 
 log = logging.getLogger(__name__)
+
+
+def get_lp(login=True):
+    if not login:
+        return Launchpad.login_anonymously('review-queue', 'production')
+
+    return Launchpad.login_with(
+        'review-queue', 'production',
+        credentials_file='lp-creds',
+        credential_save_failed=lambda: None)
 
 
 def charmstore(settings):

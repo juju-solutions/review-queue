@@ -80,6 +80,8 @@ def main(global_config, **settings):
     config.include('reviewqueue.views.home')
     config.include('reviewqueue.views.reviews')
     config.include('reviewqueue.views.users')
+    config.include('reviewqueue.views.revisions')
+    config.include('reviewqueue.views.revision_tests')
 
     config.scan()
     return config.make_wsgi_app()
