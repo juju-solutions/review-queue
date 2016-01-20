@@ -44,23 +44,6 @@ class DB(object):
         review.create_tests(settings)
         return review
 
-    def vote_on_review(self, review, user, vote):
-        if (vote == 0 or vote not in
-                range(review.MIN_SCORE,
-                      review.MAX_SCORE + 1)):
-            return False
-
-        review.votes.append(
-            M.Vote(user=user, vote=vote))
-
-        if review.score <= review.MIN_SCORE:
-            review.reject()
-
-        if review.score >= review.MAX_SCORE:
-            review.accept()
-
-        return True
-
     def get_user(self, **kw):
         return self._get_object(M.User, **kw)
 

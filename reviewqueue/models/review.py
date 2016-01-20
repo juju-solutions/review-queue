@@ -42,8 +42,8 @@ Status = make_enum(
 
 
 class Review(Base):
-    MIN_VOTES = -2
-    MAX_VOTES = 2
+    MIN_VOTE = -2
+    MAX_VOTE = 2
 
     user_id = Column(Integer, ForeignKey('user.id'))
 
@@ -51,7 +51,6 @@ class Review(Base):
     status = Column(Enum(*Status._fields, name='Status'))
 
     user = relationship('User')
-    votes = relationship('Vote')
     revisions = relationship('Revision', backref='review')
 
     @property
@@ -157,10 +156,8 @@ class Revision(Base):
 
     revision_url = Column(Text)
 
-    tests = relationship(
-        'RevisionTest',
-        backref=backref('revision'),
-    )
+    tests = relationship('RevisionTest', backref=backref('revision'))
+    comments = relationship('Comment', backref=backref('revision'))
 
     def get_test_url(self):
         return self.revision_url
@@ -219,16 +216,6 @@ class Revision(Base):
         return os.path.join(root_dir, str(self.id))
 
 
-class Vote(Base):
-    review_id = Column(Integer, ForeignKey('review.id'))
-    user_id = Column(Integer, ForeignKey('user.id'))
-
-    vote = Column(Integer)
-
-    review = relationship('Review')
-    user = relationship('User')
-
-
 class User(Base):
     openid_claimed_id = Column(Text)
     nickname = Column(Text)
@@ -238,7 +225,6 @@ class User(Base):
 
     comments = relationship('Comment')
     reviews = relationship('Review')
-    votes = relationship('Vote')
 
     @property
     def __acl__(self):
@@ -248,10 +234,10 @@ class User(Base):
 
 
 class Comment(Base):
-    review_id = Column(Integer, ForeignKey('review.id'))
+    revision_id = Column(Integer, ForeignKey('revision.id'))
     user_id = Column(Integer, ForeignKey('user.id'))
 
     text = Column(Text)
+    vote = Column(Integer)
 
-    review = relationship('Review')
     user = relationship('User')

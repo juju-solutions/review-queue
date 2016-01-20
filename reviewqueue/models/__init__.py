@@ -5,4 +5,4 @@ from .review import Review  # noqa
 from .review import Revision  # noqa
 from .review import Status  # noqa
 from .review import User  # noqa
-from .review import Vote  # noqa
+from .review import Comment  # noqa

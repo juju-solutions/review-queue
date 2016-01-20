@@ -9,11 +9,12 @@ from sqlalchemy import (
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
-DBSession = sessionmaker(extension=ZopeTransactionExtension())
+DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 
 
 class Base(object):

@@ -35,9 +35,9 @@
 </table>
 
 % if request.user and request.user.is_charmer:
-<h2>New Test</h2>
+<h3>New Test</h3>
 <form method="post"
-      action="${request.route_url('test_revision', id=review.latest_revision.id)}">
+      action="${request.route_url('revision_test', id=review.latest_revision.id)}">
   <select name="substrate">
     % for substrate in substrates:
       <option value="${substrate}">${substrate}</option>
@@ -47,6 +47,31 @@
   <input type="submit" value="Start Test">
 </form>
 % endif
+
+<h2>Comments/Votes<h2>
+%for comment in review.latest_revision.comments:
+  <p>${comment.text}</p>
+  <p>${comment.vote}</p>
+%endfor
+<h3>Add Comment</h3>
+<form method="post"
+      action="${request.route_url('revision_comment', id=review.latest_revision.id)}">
+  <textarea name="comment"></textarea>
+  <br>Vote:
+  <select name="vote">
+    % if request.user and request.user.is_charmer:
+      <option value="2">Accept (+2)</option>
+    % endif
+    <option value="1">Approve (+1)</option>
+    <option value="0" selected>Abstain (0)</option>
+    <option value="-1">Disapprove (-1)</option>
+    % if request.user and request.user.is_charmer:
+      <option value="-2">Reject (-2)</option>
+    % endif
+  </select>
+  <br><input type="submit" value="Save Comment">
+</form>
+
 
 <h2>Diff</h2>
 % for change in review.get_diff(request.registry.settings).get_changes():

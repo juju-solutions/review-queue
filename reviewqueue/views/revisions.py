@@ -3,21 +3,27 @@ from pyramid.httpexceptions import (
     HTTPFound,
 )
 from pyramid.security import Allow
+from pyramid.security import Authenticated
 from pyramid.security import Everyone
 from pyramid.view import view_config
 
 from ..db import DB
+from .. import models as M
 
 
 def includeme(config):
     config.add_route(
-        'test_revision', '/revision/{id}/test',
+        'revision_test', '/revision/{id}/test',
+        factory=RevisionFactory, traverse='/{id}')
+    config.add_route(
+        'revision_comment', '/revision/{id}/comment',
         factory=RevisionFactory, traverse='/{id}')
 
 
 class RevisionFactory(object):
     __acl__ = [
         (Allow, Everyone, 'view'),
+        (Allow, Authenticated, 'comment'),
     ]
 
     def __init__(self, request):
@@ -35,7 +41,7 @@ class RevisionFactory(object):
 
 
 @view_config(
-    route_name='test_revision',
+    route_name='revision_test',
     permission='view',
 )
 def revision_test(request):
@@ -59,6 +65,32 @@ def revision_test(request):
 
     revision.create_tests(
         request.registry.settings, substrates=substrate)
+
+    return HTTPFound(location=request.route_url(
+        'reviews_show', id=revision.review.id))
+
+
+@view_config(
+    route_name='revision_comment',
+    permission='comment',
+)
+def revision_comment(request):
+    """Comment/vote on a Revision
+
+    POST /revision/:id/comment
+
+    """
+    revision = request.context
+    user = request.user
+    comment_text = request.params.get('comment')
+    vote = int(request.params.get('vote', 0))
+
+    comment = M.Comment(
+        text=comment_text,
+        vote=vote,
+        user=user,
+    )
+    revision.comments.append(comment)
 
     return HTTPFound(location=request.route_url(
         'reviews_show', id=revision.review.id))
