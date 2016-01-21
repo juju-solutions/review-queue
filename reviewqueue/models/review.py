@@ -21,7 +21,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from .base import Base
+from .base import Base, DBSession
 from .. import helpers as h
 
 
@@ -159,6 +159,14 @@ class Revision(Base):
     tests = relationship('RevisionTest', backref=backref('revision'))
     comments = relationship('Comment', backref=backref('revision'))
 
+    def get_policy_check_for(self, policy_id):
+        return (
+            DBSession.query(RevisionPolicyCheck)
+            .filter_by(revision_id=self.id)
+            .filter_by(policy_id=policy_id)
+            .first()
+        )
+
     def get_test_url(self):
         return self.revision_url
 
@@ -241,3 +249,26 @@ class Comment(Base):
     vote = Column(Integer)
 
     user = relationship('User')
+
+
+class Policy(Base):
+    description = Column(Text)
+
+
+class RevisionPolicyCheck(Base):
+    revision_id = Column(Integer, ForeignKey('revision.id'))
+    policy_id = Column(Integer, ForeignKey('policy.id'))
+
+    status = Column(Integer)
+
+    @property
+    def unreviewed(self):
+        return self.status in (None, 0)
+
+    @property
+    def passing(self):
+        return self.status == 1
+
+    @property
+    def failing(self):
+        return self.status == 2

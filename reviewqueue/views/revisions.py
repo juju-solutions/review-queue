@@ -1,6 +1,7 @@
 from pyramid.httpexceptions import (
     HTTPUnauthorized,
     HTTPFound,
+    HTTPOk,
 )
 from pyramid.security import Allow
 from pyramid.security import Authenticated
@@ -13,10 +14,13 @@ from .. import models as M
 
 def includeme(config):
     config.add_route(
-        'revision_test', '/revision/{id}/test',
+        'revision_test', '/revisions/{id}/test',
         factory=RevisionFactory, traverse='/{id}')
     config.add_route(
-        'revision_comment', '/revision/{id}/comment',
+        'revision_comment', '/revisions/{id}/comment',
+        factory=RevisionFactory, traverse='/{id}')
+    config.add_route(
+        'revision_policy', '/revisions/{id}/policy',
         factory=RevisionFactory, traverse='/{id}')
 
 
@@ -47,7 +51,7 @@ class RevisionFactory(object):
 def revision_test(request):
     """Submit new tests for a Revision
 
-    POST /revision/:id/test
+    POST /revisions/:id/test
 
     """
     revision = request.context
@@ -77,7 +81,7 @@ def revision_test(request):
 def revision_comment(request):
     """Comment/vote on a Revision
 
-    POST /revision/:id/comment
+    POST /revisions/:id/comment
 
     """
     revision = request.context
@@ -94,3 +98,29 @@ def revision_comment(request):
 
     return HTTPFound(location=request.route_url(
         'reviews_show', id=revision.review.id))
+
+
+@view_config(
+    route_name='revision_policy',
+    permission='comment',
+)
+def revision_policy(request):
+    """Set the status of a RevisionPolicyCheck
+
+    POST /revisions/:id/policy
+
+    """
+    revision = request.context
+    policy_id = int(request.params.get('policy_id'))
+    status = int(request.params.get('status', 0))
+
+    policy_check = revision.get_policy_check_for(policy_id)
+    if not policy_check:
+        policy_check = M.RevisionPolicyCheck(
+            revision_id=revision.id,
+            policy_id=policy_id
+        )
+        M.DBSession().add(policy_check)
+    policy_check.status = status
+
+    return HTTPOk()

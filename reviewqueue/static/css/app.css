@@ -9,12 +9,12 @@ form#login {
   padding-left: 20px;
   padding-right: 20px;
 }
-.diff_add {
+.diff_add, .policyStatus1 {
   background-color: #eaffea;
 }
 .diff_chg {
   background-color: #ffefc6
 }
-.diff_sub {
+.diff_sub, .policyStatus2 {
   background-color: #ffecec;
 }

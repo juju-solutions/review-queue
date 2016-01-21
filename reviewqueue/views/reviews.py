@@ -9,6 +9,7 @@ from theblues.charmstore import CharmStore
 from theblues.errors import EntityNotFound
 
 from ..db import DB
+from .. import models as M
 
 
 def includeme(config):
@@ -127,4 +128,5 @@ def show(request):
     return {
         'review': review,
         'substrates': substrates,
+        'policy_checklist': M.DBSession.query(M.Policy),
     }

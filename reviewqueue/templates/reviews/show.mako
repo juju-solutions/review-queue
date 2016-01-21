@@ -72,10 +72,42 @@
   <br><input type="submit" value="Save Comment">
 </form>
 
+<h2>Review Checklist</h2>
+<form id="policyForm">
+<table class="table">
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Unreviewed</th>
+      <th>Pass</th>
+      <th>Fail</th>
+    </tr>
+  </thead>
+  <tbody>
+    % for policy in policy_checklist:
+    <% policy_check = review.latest_revision.get_policy_check_for(policy.id) %>
+    <tr class="${'policyStatus{}'.format(policy_check.status) if policy_check else ''}">
+      <td>${policy.description}</td>
+      <td><input type="radio" name="policy${policy.id}" value="0"
+            data-revision-id="${review.latest_revision.id}"
+            data-policy-id="${policy.id}"
+            ${"checked" if not policy_check or policy_check.unreviewed else ""}></td>
+      <td><input type="radio" name="policy${policy.id}" value="1"
+            data-revision-id="${review.latest_revision.id}"
+            data-policy-id="${policy.id}"
+            ${"checked" if policy_check and policy_check.passing else ""}></td>
+      <td><input type="radio" name="policy${policy.id}" value="2"
+            data-revision-id="${review.latest_revision.id}"
+            data-policy-id="${policy.id}"
+            ${"checked" if policy_check and policy_check.failing else ""}></td>
+    </tr>
+    % endfor
+  </tbody>
+</table>
+</form>
 
 <h2>Diff</h2>
 % for change in review.get_diff(request.registry.settings).get_changes():
   <h3>${change.description}</h3>
   ${change.html_diff(context=True) | n}
 % endfor
-
