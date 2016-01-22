@@ -68,6 +68,10 @@ class Review(Base):
                 settings, substrates
             )
 
+    def refresh_tests(self, settings):
+        for r in self.revisions:
+            r.refresh_tests(settings)
+
     def reject(self):
         pass
 
@@ -169,6 +173,40 @@ class Revision(Base):
 
     def get_test_url(self):
         return self.revision_url
+
+    def get_tests_for_retry(self):
+        return (
+            DBSession.query(RevisionTest)
+            .filter_by(revision_id=self.id)
+            .filter_by(status='RETRY')
+        )
+
+    def get_tests_overdue(self, timeout):
+        tests = (
+            DBSession.query(RevisionTest)
+            .filter_by(revision_id=self.id)
+            .filter(RevisionTest.status.in_([
+                'PENDING',
+                'RUNNING']))
+        )
+
+        now = datetime.datetime.utcnow()
+        return [
+            t for t in tests
+            if (now - t.updated).total_seconds() > timeout
+        ]
+
+    def refresh_tests(self, settings):
+        for t in self.get_tests_for_retry():
+            t.send_ci_request(settings)
+
+        timeout = int(settings.get(
+            'testing.timeout', 60 * 60 * 24))
+        for t in self.get_tests_overdue(timeout):
+            if t.status == 'RUNNING':
+                if t.try_finish():
+                    continue
+            t.send_ci_request(settings)
 
     def create_tests(self, settings, substrates=None):
         substrates = (

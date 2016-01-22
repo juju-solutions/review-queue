@@ -12,6 +12,7 @@ requires = [
     'arrow',
     'binaryornot',
     'cached_property',
+    'celery[redis]',
     'jsonschema',
     'launchpadlib',
     'psycopg2',
