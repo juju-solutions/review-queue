@@ -15,6 +15,7 @@ requires = [
     'jsonschema',
     'launchpadlib',
     'psycopg2',
+    'pygments',
     'pyramid',
     'pyramid_mako',
     'pyramid_debugtoolbar',

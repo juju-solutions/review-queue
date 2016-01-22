@@ -109,5 +109,5 @@
 <h2>Diff</h2>
 % for change in review.get_diff(request.registry.settings).get_changes():
   <h3>${change.description}</h3>
-  ${change.html_diff(context=True) | n}
+  ${change.pygments_diff(context=True) | n}
 % endfor

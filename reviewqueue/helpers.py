@@ -152,6 +152,23 @@ class Change(object):
 
         return diff
 
+    def pygments_diff(self, **kw):
+        from pygments import highlight
+        from pygments.lexers import DiffLexer
+        from pygments.formatters import HtmlFormatter
+
+        if self.is_dir_comparison():
+            return ''
+        if self.is_binary_comparison():
+            return ''
+
+        from_lines = self._get_lines(self.left_file)
+        to_lines = self._get_lines(self.right_file)
+
+        diff_lines = difflib.unified_diff(from_lines, to_lines)
+        diff_text = ''.join(diff_lines)
+        return highlight(diff_text, DiffLexer(), HtmlFormatter())
+
     def _get_lines(self, filename):
         if not filename:
             return []
