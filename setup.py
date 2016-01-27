@@ -23,6 +23,7 @@ requires = [
     'pyramid_tm',
     'pyyaml',
     'requests==2.6.0',
+    'simplejson',
     'sqlalchemy',
     'sqlalchemy-utils',
     'theblues',

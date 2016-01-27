@@ -29,17 +29,28 @@ class DB(object):
         review = M.Review(
             source_url=source_url,
             status=M.Status.NEEDS_REVIEW,
+            promulgated=(
+                charmstore_entity['Meta']['promulgated']['Promulgated']),
+            charm_name=(
+                charmstore_entity['Meta']['id-name']['Name']),
         )
         user.reviews.append(review)
 
-        # get (at most) the first two revisions
-        for i, revision_url in enumerate(revision_urls):
-            revision = M.Revision(
-                revision_url=revision_url,
+        # get the latest revision
+        review.revisions.append(
+            M.Revision(revision_url=revision_urls[0])
+        )
+
+        if review.promulgated:
+            # get the promulgated revision to diff against
+            cs = h.charmStore(settings)
+            promulgated_entity = h.get_charmstore_entity(
+                cs, 'cs:{}'.format(review.charm_name))
+            promulgated_revision_url = (
+                promulgated_entity['Meta']['revision-info']['Revisions'][0])
+            review.revisions.append(
+                M.Revision(revision_url=promulgated_revision_url)
             )
-            review.revisions.append(revision)
-            if i > 0:
-                break
 
         review.create_tests(settings)
         return review

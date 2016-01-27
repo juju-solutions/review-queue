@@ -1,5 +1,6 @@
 import argparse
 import logging
+import transaction
 
 from pyramid.paster import (
     get_appsettings,
@@ -13,10 +14,8 @@ from sqlalchemy_utils import (
     database_exists,
 )
 
-from reviewqueue.models import (
-    Base,
-    DBSession,
-)
+from reviewqueue import models as M
+
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +39,14 @@ def main():
     except sqlalchemy.exc.OperationalError as e:
         log.warn("Couldn't create database: %s", e)
 
-    DBSession.configure(bind=engine)
+    M.DBSession.configure(bind=engine)
     if args.force:
-        Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+        M.Base.metadata.drop_all(engine)
+    M.Base.metadata.create_all(engine)
+
+    if args.force:
+        # Insert some stuff
+        with transaction.manager:
+            M.DBSession.add(
+                M.Policy(description="Must have hooks that are idempotent")
+            )

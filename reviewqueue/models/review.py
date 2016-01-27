@@ -21,6 +21,8 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from sqlalchemy.ext.orderinglist import ordering_list
+
 from .base import Base, DBSession
 from .. import helpers as h
 
@@ -48,10 +50,15 @@ class Review(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
 
     source_url = Column(Text)
+    charm_name = Column(Text)
     status = Column(Enum(*Status._fields, name='Status'))
+    promulgated = Column(Boolean)
 
     user = relationship('User')
-    revisions = relationship('Revision', backref='review')
+    revisions = relationship(
+        'Revision',
+        backref='review', order_by='Revision._position',
+        collection_class=ordering_list('_position'))
 
     @property
     def age(self):
@@ -64,13 +71,31 @@ class Review(Base):
 
     def create_tests(self, settings, substrates=None):
         if self.revisions:
-            self.revisions[0].create_tests(
+            self.latest_revision.create_tests(
                 settings, substrates
             )
 
     def refresh_tests(self, settings):
         for r in self.revisions:
             r.refresh_tests(settings)
+
+    def refresh_revisions(self, settings):
+        """Check for and download new source revisions for this review.
+
+        """
+        cs = h.charmStore(settings)
+        charmstore_entity = h.get_charmstore_entity(cs, self.source_url)
+        remote_revisions = (
+            charmstore_entity['Meta']['revision-info']['Revisions'])
+        current_revision = self.latest_revision.revision_url
+        new_revisions = (
+            remote_revisions[0:remote_revisions.index(current_revision)])
+        if new_revisions:
+            self.revisions = (
+                [Revision(revision_url=url) for url in new_revisions] +
+                self.revisions
+            )
+            self.create_tests(settings)
 
     def reject(self):
         pass
@@ -79,9 +104,8 @@ class Review(Base):
         pass
 
     def get_diff(self, settings):
-        current_revision = self.revisions[0]
-        prior_revision = self.revisions[1] if len(self.revisions) > 1 else None
-        return current_revision.get_diff(prior_revision, settings)
+        prior_revision = self.revisions[-1] if self.promulgated else None
+        return self.latest_revision.get_diff(prior_revision, settings)
 
 
 class RevisionTest(Base):
@@ -159,6 +183,7 @@ class Revision(Base):
     review_id = Column(Integer, ForeignKey('review.id'))
 
     revision_url = Column(Text)
+    _position = Column(Integer)
 
     tests = relationship('RevisionTest', backref=backref('revision'))
     comments = relationship('Comment', backref=backref('revision'))

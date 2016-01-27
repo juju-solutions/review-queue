@@ -5,11 +5,11 @@ from pyramid.security import Authenticated
 from pyramid.security import Everyone
 from pyramid.view import view_config
 
-from theblues.charmstore import CharmStore
 from theblues.errors import EntityNotFound
 
 from ..db import DB
 from .. import models as M
+from .. import helpers as h
 
 
 def includeme(config):
@@ -91,9 +91,9 @@ def create(request):
     """
     source_url = request.params['source_url']
 
-    cs = CharmStore(request.registry.settings['charmstore.api.url'])
+    cs = h.charmstore(request.registry.settings)
     try:
-        charmstore_entity = cs.entity(source_url)
+        charmstore_entity = h.get_charmstore_entity(cs, source_url)
     except EntityNotFound:
         return render_to_response(
             'reviews/new.mako',

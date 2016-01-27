@@ -28,6 +28,18 @@ def charmstore(settings):
     return CharmStore(settings['charmstore.api.url'])
 
 
+def get_charmstore_entity(
+        charmstore, entity_id, includes=None, get_files=False):
+    includes = includes or [
+        'revision-info',
+        'promulgated',
+        'id-name'
+    ]
+    if get_files:
+        includes.append('manifest')
+    return charmstore._meta(entity_id, includes)
+
+
 def download_file(url):
     r = requests.get(url, stream=True)
     f = tempfile.NamedTemporaryFile(delete=False)
