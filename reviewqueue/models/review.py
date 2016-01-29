@@ -213,6 +213,9 @@ class Revision(Base):
         if comment.vote < 0 and self.review.vote < 0:
             self.review.status = Status.NEEDS_FIXING
 
+        if comment.vote > 1 or self.review.vote > 1:
+            self.review.status = Status.APPROVED
+
     def get_policy_check_for(self, policy_id):
         return (
             DBSession.query(RevisionPolicyCheck)
