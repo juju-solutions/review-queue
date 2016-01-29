@@ -52,9 +52,11 @@ def download_file(url):
 
 
 class Diff(object):
-    def __init__(self, from_dir, to_dir):
+    def __init__(self, from_dir, to_dir, from_root_dir=None, to_root_dir=None):
         self.from_dir = from_dir
         self.to_dir = to_dir
+        self.from_root_dir = from_root_dir
+        self.to_root_dir = to_root_dir
 
     def get_changes(self):
         tmp_from_dir = None
@@ -69,7 +71,10 @@ class Diff(object):
         if tmp_from_dir:
             os.rmdir(tmp_from_dir)
 
-        return changes
+        return [
+            c.set_root_dirs(self.from_root_dir, self.to_root_dir)
+            for c in changes
+        ]
 
 
 class dircmp(filecmp.dircmp):
@@ -129,10 +134,33 @@ class Change(object):
     def __init__(self, left_file, right_file):
         self.left_file = left_file
         self.right_file = right_file
+        self.from_root_dir = None
+        self.to_root_dir = None
+
+    def set_root_dirs(self, from_root_dir, to_root_dir):
+        self.from_root_dir = from_root_dir
+        self.to_root_dir = to_root_dir
+        return self
 
     @property
     def description(self):
-        return self.right_file or self.left_file
+        return self.relative_right_file_path or self.relative_left_file_path
+
+    @property
+    def relative_right_file_path(self):
+        return self.relative_file_path(
+            self.to_root_dir, self.right_file)
+
+    @property
+    def relative_left_file_path(self):
+        return self.relative_file_path(
+            self.from_root_dir, self.left_file)
+
+    def relative_file_path(self, root_path, file_path):
+        if not (root_path and file_path and
+                file_path.startswith(root_path)):
+            return file_path or ''
+        return file_path[len(root_path):].strip(os.sep)
 
     def is_binary_comparison(self):
         return (
@@ -179,7 +207,11 @@ class Change(object):
         if not (from_lines or to_lines):
             return ''
 
-        diff_lines = difflib.unified_diff(from_lines, to_lines)
+        diff_lines = difflib.unified_diff(
+            from_lines, to_lines,
+            fromfile=self.relative_left_file_path,
+            tofile=self.relative_right_file_path,
+        )
         diff_text = ''.join(diff_lines)
         return highlight(
             diff_text,

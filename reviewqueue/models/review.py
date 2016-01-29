@@ -265,7 +265,12 @@ class Revision(Base):
         if prior_revision:
             from_dir = prior_revision.fetch_source(settings)
 
-        return h.Diff(from_dir, to_dir)
+        return h.Diff(
+            from_dir, to_dir,
+            prior_revision.get_source_dir(settings)
+            if prior_revision else None,
+            self.get_source_dir(settings),
+        )
 
     def fetch_source(self, settings):
         source_dir = self.get_source_dir(settings)
