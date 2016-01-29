@@ -80,7 +80,7 @@
 <form method="post"
       action="${request.route_url('revision_comment', id=review.latest_revision.id)}">
   <div class="form-group">
-    <textarea name="comment" class="form-control" rows="5"></textarea>
+    <textarea name="comment" class="form-control" rows="5" required></textarea>
   </div>
   <div class="form-inline">
     <div class="form-group">

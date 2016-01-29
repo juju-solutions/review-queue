@@ -6,7 +6,7 @@
   <div class="form-group">
     <label for="source_url">Source URL</label>
     <input type="text" class="form-control" id="source_url"
-           name="source_url" placeholder="Source URL">
+           name="source_url" placeholder="Source URL" required>
   </div>
   <div class="form-group">
     <label for="description">Description</label>
