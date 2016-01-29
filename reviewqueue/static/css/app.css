@@ -18,3 +18,10 @@ form#login {
 .diff_sub, .policyStatus2 {
   background-color: #ffecec;
 }
+table.highlighttable {
+  min-width: 800px;
+  width: 100%;
+}
+td.linenos {
+  width: 50px;
+}

@@ -9,7 +9,7 @@
       <th>Substrate</th>
       <th>Status</th>
       <th>Results</th>
-      <th>Submitted</th>
+      <th>Last Updated</th>
     </tr>
   </thead>
   <tbody>
@@ -27,7 +27,7 @@
             <a href="${test.url}console">${test.url}console</a>
           % endif
         </td>
-        <td>${test.updated_at}</td>
+        <td>${test.updated_at or test.created_at}</td>
       </tr>
       % endfor
     % endif
@@ -35,44 +35,61 @@
 </table>
 
 % if request.user and request.user.is_charmer:
-<h3>New Test</h3>
 <form method="post"
-      action="${request.route_url('revision_test', id=review.latest_revision.id)}">
-  <select name="substrate">
+      action="${request.route_url('revision_test', id=review.latest_revision.id)}"
+      class="form-inline">
+  <select name="substrate" class="form-control">
     % for substrate in substrates:
       <option value="${substrate}">${substrate}</option>
     % endfor
     <option value="all">All</option>
   </select>
-  <input type="submit" value="Start Test">
+    <button type="submit" class="btn btn-default">Start Test</button>
 </form>
 % endif
 
-<h2>Comments/Votes<h2>
+<hr>
+
 %for comment in review.latest_revision.comments:
-  <p>${comment.text}</p>
-  <p>${comment.vote}</p>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="pull-right"><strong>Vote:</strong> ${comment.vote}</div>
+    ${comment.user.nickname} wrote at ${comment.created_at}
+  </div>
+  <div class="panel-body">
+    ${comment.text}
+  </div>
+</div>
 %endfor
+
 <h3>Add Comment</h3>
 <form method="post"
       action="${request.route_url('revision_comment', id=review.latest_revision.id)}">
-  <textarea name="comment"></textarea>
-  <br>Vote:
-  <select name="vote">
-    % if request.user and request.user.is_charmer:
-      <option value="2">Accept (+2)</option>
-    % endif
-    <option value="1">Approve (+1)</option>
-    <option value="0" selected>Abstain (0)</option>
-    <option value="-1">Disapprove (-1)</option>
-    % if request.user and request.user.is_charmer:
-      <option value="-2">Reject (-2)</option>
-    % endif
-  </select>
-  <br><input type="submit" value="Save Comment">
+  <div class="form-group">
+    <textarea name="comment" class="form-control" rows="5"></textarea>
+  </div>
+  <div class="form-inline">
+    <div class="form-group">
+      <label for="vote">Vote</label>
+      <select name="vote" class="form-control">
+        % if request.user and request.user.is_charmer:
+          <option value="2">Accept (+2)</option>
+        % endif
+        <option value="1">Approve (+1)</option>
+        <option value="0" selected>Abstain (comment only)</option>
+        <option value="-1">Disapprove (-1)</option>
+        % if request.user and request.user.is_charmer:
+          <option value="-2">Reject (-2)</option>
+        % endif
+      </select>
+    </div>
+    <button type="submit" class="btn btn-default pull-right">Save Comment</button>
+  </div>
 </form>
 
-<h2>Review Checklist</h2>
+<hr>
+
+<h2>Reviewer's Checklist</h2>
 <form id="policyForm">
 <table class="table">
   <thead>
@@ -106,8 +123,10 @@
 </table>
 </form>
 
-<h2>Diff</h2>
 % for change in review.get_diff(request.registry.settings).get_changes():
+  <% diff = change.pygments_diff(context=True) %>
+  % if diff:
   <h3>${change.description}</h3>
-  ${change.pygments_diff(context=True) | n}
+  ${diff | n}
+  % endif
 % endfor

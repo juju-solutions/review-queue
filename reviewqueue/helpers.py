@@ -176,10 +176,15 @@ class Change(object):
 
         from_lines = self._get_lines(self.left_file)
         to_lines = self._get_lines(self.right_file)
+        if not (from_lines or to_lines):
+            return ''
 
         diff_lines = difflib.unified_diff(from_lines, to_lines)
         diff_text = ''.join(diff_lines)
-        return highlight(diff_text, DiffLexer(), HtmlFormatter())
+        return highlight(
+            diff_text,
+            DiffLexer(),
+            HtmlFormatter(linenos=True))
 
     def _get_lines(self, filename):
         if not filename:
