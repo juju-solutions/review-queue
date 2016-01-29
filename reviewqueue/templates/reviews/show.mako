@@ -1,6 +1,9 @@
 <%inherit file="../base.mako"/>
 
 <h1>${review.source_url}</h1>
+% if review.description:
+<p>${review.description}
+% endif
 
 <h2>Tests</h2>
 <table class="table">

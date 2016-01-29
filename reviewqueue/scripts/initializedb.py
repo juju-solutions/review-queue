@@ -47,6 +47,8 @@ def main():
     if args.force:
         # Insert some stuff
         with transaction.manager:
-            M.DBSession.add(
-                M.Policy(description="Must have hooks that are idempotent")
-            )
+            M.DBSession.add_all([
+                M.Policy(description="Must have passing tests"),
+                M.Policy(description="Must have hooks that are idempotent"),
+                M.Policy(description="Must not have immutable configuration"),
+            ])

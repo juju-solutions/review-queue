@@ -17,7 +17,7 @@
 
         <ul class="nav navbar-nav">
         %if request.user:
-          <li><a href="${request.route_url('reviews_new')}">Request Review</a></li>
+          <li><a href="${request.route_url('reviews_new')}">Request a Review</a></li>
         %endif
         </ul>
 

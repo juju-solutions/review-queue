@@ -50,6 +50,7 @@ class Review(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
 
     source_url = Column(Text)
+    description = Column(Text)
     charm_name = Column(Text)
     status = Column(Enum(*Status._fields, name='Status'))
     promulgated = Column(Boolean)

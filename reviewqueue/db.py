@@ -24,10 +24,12 @@ class DB(object):
     def get_revision(self, **kw):
         return self._get_object(M.Revision, **kw)
 
-    def create_review(self, user, source_url, charmstore_entity, settings):
+    def create_review(
+            self, user, source_url, description, charmstore_entity, settings):
         revision_urls = charmstore_entity['Meta']['revision-info']['Revisions']
         review = M.Review(
             source_url=source_url,
+            description=description,
             status=M.Status.NEEDS_REVIEW,
             promulgated=(
                 charmstore_entity['Meta']['promulgated']['Promulgated']),

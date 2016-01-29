@@ -90,6 +90,7 @@ def create(request):
 
     """
     source_url = request.params['source_url']
+    description = request.params.get('description')
 
     cs = h.charmstore(request.registry.settings)
     try:
@@ -104,6 +105,7 @@ def create(request):
     db.create_review(
         request.user,
         source_url,
+        description,
         charmstore_entity,
         request.registry.settings,
     )
