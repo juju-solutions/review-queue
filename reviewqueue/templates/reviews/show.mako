@@ -70,6 +70,9 @@
   </div>
   <div class="form-inline">
     <div class="form-group">
+      % if review.user == request.user:
+        <input type="hidden" name="vote" value="0">
+      % else:
       <label for="vote">Vote</label>
       <select name="vote" class="form-control">
         % if request.user and request.user.is_charmer:
@@ -82,6 +85,7 @@
           <option value="-2">Reject (-2)</option>
         % endif
       </select>
+      % endif
     </div>
     <button type="submit" class="btn btn-default pull-right">Save Comment</button>
   </div>

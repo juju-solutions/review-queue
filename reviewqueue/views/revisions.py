@@ -88,6 +88,9 @@ def revision_comment(request):
     user = request.user
     comment_text = request.params.get('comment')
     vote = int(request.params.get('vote', 0))
+    if revision.review.user == user:
+        # user can't vote on their own review
+        vote = 0
 
     comment = M.Comment(
         text=comment_text,
