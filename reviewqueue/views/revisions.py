@@ -87,6 +87,7 @@ def revision_comment(request):
     revision = request.context
     user = request.user
     comment_text = request.params.get('comment')
+    status = request.params.get('status')
     vote = int(request.params.get('vote', 0))
     if revision.review.user == user:
         # user can't vote on their own review
@@ -97,7 +98,9 @@ def revision_comment(request):
         vote=vote,
         user=user,
     )
-    revision.comments.append(comment)
+    revision.add_comment(comment)
+    if status:
+        revision.review.status = status
 
     return HTTPFound(location=request.route_url(
         'reviews_show', id=revision.review.id))

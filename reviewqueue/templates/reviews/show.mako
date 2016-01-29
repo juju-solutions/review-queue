@@ -1,9 +1,13 @@
 <%inherit file="../base.mako"/>
 
 <h1>${review.source_url}</h1>
+<strong>Current Status:</strong> ${review.human_status}<br>
+<strong>Current Vote:</strong> ${review.human_vote} (+2 needed for approval)
 % if review.description:
 <p>${review.description}
 % endif
+
+<hr>
 
 <h2>Tests</h2>
 <table class="table">
@@ -56,7 +60,7 @@
 %for comment in review.latest_revision.comments:
 <div class="panel panel-default">
   <div class="panel-heading">
-    <div class="pull-right"><strong>Vote:</strong> ${comment.vote}</div>
+    <div class="pull-right"><strong>Voted:</strong> ${comment.human_vote}</div>
     ${comment.user.nickname} wrote at ${comment.created_at}
   </div>
   <div class="panel-body">
@@ -64,6 +68,13 @@
   </div>
 </div>
 %endfor
+
+<%def name="status_option(status, review)">
+  <option value="${status}"
+    ${"selected" if review.status == status else ""}>
+    ${"Leave as " if review.status == status else "Update to "}${h.human_status(status)}
+  </option>
+</%def>
 
 <h3>Add Comment</h3>
 <form method="post"
@@ -75,6 +86,11 @@
     <div class="form-group">
       % if review.user == request.user:
         <input type="hidden" name="vote" value="0">
+        <label for="status">Status</label>
+        <select name="status" class="form-control">
+          ${status_option('NEEDS_FIXING', review)}
+          ${status_option('NEEDS_REVIEW', review)}
+        </select>
       % else:
       <label for="vote">Vote</label>
       <select name="vote" class="form-control">

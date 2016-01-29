@@ -15,7 +15,7 @@
   %for r in reviews:
     <tr>
       <td><a href="${request.route_url('reviews_show', id=r.id)}">${r.source_url}</a></td>
-      <td>${r.status}</td>
+      <td>${r.human_status}</td>
       <td>${h.arrow.get(r.updated_at or r.created_at).humanize()}</td>
       <td><a href="${request.route_url('users_show', nickname=r.user.nickname)}">${r.user.nickname}</a></td>
       <td>${r.age.days} d</td>

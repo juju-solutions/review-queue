@@ -43,6 +43,14 @@ Status = make_enum(
 )
 
 
+class Vote(object):
+    ACCEPT = 2
+    APPROVE = 1
+    ABSTAIN = 0
+    DISAPPROVE = -1
+    REJECT = -2
+
+
 class Review(Base):
     MIN_VOTE = -2
     MAX_VOTE = 2
@@ -51,6 +59,7 @@ class Review(Base):
 
     source_url = Column(Text)
     description = Column(Text)
+    vote = Column(Integer, default=0)
     charm_name = Column(Text)
     status = Column(Enum(*Status._fields, name='Status'))
     promulgated = Column(Boolean)
@@ -66,9 +75,17 @@ class Review(Base):
         return datetime.datetime.utcnow() - self.created_at
 
     @property
+    def human_status(self):
+        return h.human_status(self.status)
+
+    @property
+    def human_vote(self):
+        return h.human_vote(self.vote)
+
+    @property
     def latest_revision(self):
         #TODO use query instead
-        return self.revisions[0]
+        return self.revisions[0] if self.revisions else None
 
     def create_tests(self, settings, substrates=None):
         if self.revisions:
@@ -96,13 +113,9 @@ class Review(Base):
                 [Revision(revision_url=url) for url in new_revisions] +
                 self.revisions
             )
+            self.status = Status.NEEDS_REVIEW
+            self.vote = 0
             self.create_tests(settings)
-
-    def reject(self):
-        pass
-
-    def accept(self):
-        pass
 
     def get_diff(self, settings):
         prior_revision = self.revisions[-1] if self.promulgated else None
@@ -188,6 +201,17 @@ class Revision(Base):
 
     tests = relationship('RevisionTest', backref=backref('revision'))
     comments = relationship('Comment', backref=backref('revision'))
+
+    def add_comment(self, comment):
+        self.comments.append(comment)
+
+        if comment.vote == Vote.REJECT:
+            self.review.vote = -1
+        else:
+            self.review.vote += comment.vote
+
+        if comment.vote < 0 and self.review.vote < 0:
+            self.review.status = Status.NEEDS_FIXING
 
     def get_policy_check_for(self, policy_id):
         return (
@@ -318,6 +342,10 @@ class Comment(Base):
     vote = Column(Integer)
 
     user = relationship('User')
+
+    @property
+    def human_vote(self):
+        return h.human_vote(self.vote)
 
 
 class Policy(Base):

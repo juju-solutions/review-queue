@@ -14,6 +14,19 @@ from theblues.charmstore import CharmStore
 log = logging.getLogger(__name__)
 
 
+def human_vote(vote):
+    """Return integer ``vote`` as a +/- string"""
+    if vote < 0:
+        return '-{}'.format(vote)
+    else:
+        return '+{}'.format(vote)
+
+
+def human_status(status):
+    """Return string ``status`` as a human-friendly string"""
+    return " ".join(s.capitalize() for s in status.split('_'))
+
+
 def get_lp(login=True):
     if not login:
         return Launchpad.login_anonymously('review-queue', 'production')
