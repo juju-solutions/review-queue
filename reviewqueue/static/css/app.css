@@ -1,3 +1,6 @@
+pre {
+  border-radius: 0px;
+}
 form#login {
   margin: 0;
 }

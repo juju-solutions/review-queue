@@ -41,3 +41,18 @@
     <script src="${request.static_url('reviewqueue:static/javascript/app.js')}"></script>
   </body>
 </html>
+
+<%def name="human_date(date)">
+  <span title="${date}">${h.arrow.get(date).humanize()}</span>
+</%def>
+
+<%def name="status_option(status, review)">
+  <option value="${status}"
+    ${"selected" if review.status == status else ""}>
+    ${"Leave as " if review.status == status else "Update to "}${h.human_status(status)}
+  </option>
+</%def>
+
+<%def name="user_link(user)">
+  <a href="https://launchpad.net/~${user.nickname}">${user.nickname}</a>
+</%def>

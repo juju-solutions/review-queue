@@ -16,7 +16,7 @@
     <tr>
       <td><a href="${request.route_url('reviews_show', id=r.id)}">${r.source_url}</a></td>
       <td>${r.human_status}</td>
-      <td>${h.arrow.get(r.updated_at or r.created_at).humanize()}</td>
+      <td>${self.human_date(r.updated_at or r.created_at)}</td>
       <td><a href="${request.route_url('users_show', nickname=r.user.nickname)}">${r.user.nickname}</a></td>
       <td>${r.age.days} d</td>
     </tr>
