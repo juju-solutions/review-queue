@@ -7,17 +7,13 @@
   <li>Reviewed <a href="https://jujucharms.com/docs/stable/authors-charm-policy">Charm store policy</a></li>
   <li>Uploaded and published your charm to the Charm store, e.g.:
     <div>
-      <code>
-        $ cd ~/charms/trusty/meteor<br>
-        $ charm upload --publish . ~tvansteenburgh/trusty/meteor
-      </code>
+      <code>$ cd ~/charms/trusty/meteor</code><br>
+      <code>$ charm upload --publish . ~tvansteenburgh/trusty/meteor</code>
     </div>
   </li>
   <li>Set everyone=read pemissions on the charm, e.g.:
     <div>
-      <code>
-        $ charm change-perm ~tvansteenburgh/trusty/meteor --add-read=everyone
-      </code>
+      <code>$ charm change-perm ~tvansteenburgh/trusty/meteor --add-read=everyone</code>
     </div>
   </li>
 </ul>
