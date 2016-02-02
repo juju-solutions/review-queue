@@ -36,6 +36,16 @@
       ${next.body()}
     </div>
 
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">
+          <a href="://github.com/tvansteenburgh/review-queue">github repo</a> |
+          <a href="://github.com/tvansteenburgh/review-queue/issues">report a bug</a> |
+          <a href="://github.com/tvansteenburgh/review-queue/issues">request a feature</a>
+        </p>
+      </div>
+    </footer>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="${request.static_url('reviewqueue:static/javascript/app.js')}"></script>
