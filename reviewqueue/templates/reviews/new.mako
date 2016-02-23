@@ -7,13 +7,13 @@
   <li>Reviewed <a href="https://jujucharms.com/docs/stable/authors-charm-policy">Charm store policy</a></li>
   <li>Uploaded and published your charm to the Charm store, e.g.:
     <div>
-      <code>$ cd ~/charms/trusty/meteor</code><br>
-      <code>$ charm upload --publish . ~tvansteenburgh/trusty/meteor</code>
+      <code>$ cd ~/charms/meteor</code><br>
+      <code>$ charm push --publish . cs:~tvansteenburgh/meteor</code>
     </div>
   </li>
   <li>Set everyone=read pemissions on the charm, e.g.:
     <div>
-      <code>$ charm change-perm ~tvansteenburgh/trusty/meteor --add-read=everyone</code>
+      <code>$ charm change-perm cs:~tvansteenburgh/meteor --add-read=everyone</code>
     </div>
   </li>
 </ul>
@@ -22,7 +22,7 @@
   <div class="form-group">
     <label for="source_url">Charm store url</label>
     <input type="text" class="form-control" id="source_url"
-           name="source_url" placeholder="e.g. ~tvansteenburgh/trusty/meteor" required>
+           name="source_url" placeholder="e.g. ~tvansteenburgh/meteor" required>
   </div>
   <div class="form-group">
     <label for="description">Description of changes (optional)</label>

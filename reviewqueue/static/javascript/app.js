@@ -22,4 +22,25 @@ $(function() {
       }
     });
   });
+
+  $('table.highlighttable tr').on('mouseenter', function() {
+    var self = $(this);
+    var td = self.find('td.linenos');
+
+    var btn_html =
+      '<button type="button" class="btn btn-primary btn-xs add-diff-comment">' +
+      '  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>' +
+      '</button>';
+    btn = $(btn_html);
+    td.append(btn);
+  });
+
+  $('table.highlighttable tr').on('mouseleave', function() {
+    var addDiffCommentBtn = $(this).find('.btn.add-diff-comment');
+    addDiffCommentBtn.remove();
+  });
+
+  $('td.linenos .btn.add-diff-comment').on('mouseover', function(event) {
+    $(this).remove();
+  });
 });

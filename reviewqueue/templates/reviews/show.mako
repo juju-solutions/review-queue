@@ -1,10 +1,12 @@
 <%inherit file="../base.mako"/>
 
 <h1>${review.source_url}</h1>
-<strong>Status:</strong> ${review.human_status}<br>
-<strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)
+<p>
+  <strong>Status:</strong> ${review.human_status}<br>
+  <strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)
+</p>
 % if review.description:
-<p>${review.description}
+<p>${review.description}</p>
 % endif
 
 <hr>
@@ -70,6 +72,7 @@
 %endfor
 
 <h3>Add Comment</h3>
+% if request.user:
 <form method="post"
       action="${request.route_url('revision_comment', id=review.latest_revision.id)}">
   <div class="form-group">
@@ -102,6 +105,9 @@
     <button type="submit" class="btn btn-default pull-right">Save Comment</button>
   </div>
 </form>
+% else:
+<p><a href="/login/openid?openid_identifier=http://login.ubuntu.com">Login</a> to comment/vote on this review.</p>
+% endif
 
 <hr>
 

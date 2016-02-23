@@ -20,6 +20,10 @@ body {
 
 pre {
   border-radius: 0px;
+  border: 0px;
+  margin: 0px;
+  padding: 2px;
+  line-height: 125%;
 }
 form#login {
   margin: 0;
@@ -44,7 +48,23 @@ form#login {
 table.highlighttable {
   min-width: 800px;
   width: 100%;
+  border: 1px solid #ccc;
 }
 td.linenos {
   width: 50px;
+  position: relative;
+  padding-right: 10px;
+  border-right: 1px solid #ccc;
+  text-align: right;
+}
+td.linenos pre {
+  color: #aaa;
+}
+td.linenos .btn.add-diff-comment {
+  position: absolute;
+  top: -3px;
+  right: -14px;
+}
+td.code {
+  padding-left: 12px;
 }

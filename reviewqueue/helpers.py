@@ -1,11 +1,15 @@
 import difflib
 import filecmp
 import logging
+import itertools
 import os
 import tempfile
 
 import arrow  # noqa
 import requests
+
+from pygments.formatters import HtmlFormatter
+from pygments.util import StringIO
 
 from binaryornot.check import is_binary
 from launchpadlib.launchpad import Launchpad
@@ -208,7 +212,6 @@ class Change(object):
     def pygments_diff(self, **kw):
         from pygments import highlight
         from pygments.lexers import DiffLexer
-        from pygments.formatters import HtmlFormatter
 
         if self.is_dir_comparison():
             return ''
@@ -229,9 +232,85 @@ class Change(object):
         return highlight(
             diff_text,
             DiffLexer(),
-            HtmlFormatter(linenos=True))
+            TableFormatter(linenos="table"))
 
     def _get_lines(self, filename):
         if not filename:
             return []
         return open(filename, 'r').readlines()
+
+
+class TableFormatter(HtmlFormatter):
+    def _wrap_tablelinenos(self, inner):
+        dummyoutfile = StringIO()
+        lncount = 0
+        for t, line in inner:
+            if t:
+                lncount += 1
+                dummyoutfile.write(line)
+
+        fl = self.linenostart
+        mw = len(str(lncount + fl - 1))
+        sp = self.linenospecial
+        st = self.linenostep
+        la = self.lineanchors
+        aln = self.anchorlinenos
+        nocls = self.noclasses
+        if sp:
+            lines = []
+
+            for i in range(fl, fl+lncount):
+                if i % st == 0:
+                    if i % sp == 0:
+                        if aln:
+                            lines.append('<a href="#%s-%d" class="special">%*d</a>' %
+                                         (la, i, mw, i))
+                        else:
+                            lines.append('<span class="special">%*d</span>' % (mw, i))
+                    else:
+                        if aln:
+                            lines.append('<a href="#%s-%d">%*d</a>' % (la, i, mw, i))
+                        else:
+                            lines.append('%*d' % (mw, i))
+                else:
+                    lines.append('')
+            ls = '\n'.join(lines)
+        else:
+            lines = []
+            for i in range(fl, fl+lncount):
+                if i % st == 0:
+                    if aln:
+                        lines.append('<a href="#%s-%d">%*d</a>' % (la, i, mw, i))
+                    else:
+                        lines.append('%*d' % (mw, i))
+                else:
+                    lines.append('')
+            ls = '\n'.join(lines)
+
+        # in case you wonder about the seemingly redundant <div> here: since the
+        # content in the other cell also is wrapped in a div, some browsers in
+        # some configurations seem to mess up the formatting...
+        yield 0, ('<table class="%stable">' % self.cssclass)
+        for lineno, code in itertools.izip(ls.split('\n'), dummyoutfile.getvalue().split('\n')):
+            if nocls:
+                yield 0, ('<tr><td><pre style="line-height: 125%">' +
+                          lineno + '</pre></td><td class="code">' +
+                          self._wrap_code_line(code) + '</td></tr>')
+            else:
+                yield 0, ('<tr><td class="linenos"><pre>' +
+                          lineno + '</pre></td><td class="code">' +
+                          self._wrap_code_line(code) + '</td></tr>')
+        yield 0, '</table>'
+
+    def _wrap_code_line(self, code_line):
+        style = []
+        if self.prestyles:
+            style.append(self.prestyles)
+        if self.noclasses:
+            style.append('line-height: 125%')
+        style = '; '.join(style)
+
+        # the empty span here is to keep leading empty lines from being
+        # ignored by HTML parsers
+        return ('<pre' + (style and ' style="%s"' % style) + '><span></span>' +
+                code_line + '</pre>')
