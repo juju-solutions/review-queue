@@ -303,15 +303,13 @@ class TableFormatter(HtmlFormatter):
                           lineno_html + '</pre></td><td class="code">' +
                           self._wrap_code_line(code) + '</td></tr>')
             if lineno in self.comments:
-                for c in self.comments[lineno]:
-                    yield 0, self.render_diff_comment(c)
+                yield 0, self.render_diff_comment(lineno, self.comments[lineno])
 
             lineno += 1
         yield 0, '</table>'
 
-    def render_diff_comment(self, comment):
-        return ('<tr><td colspan="2" class="diff-comment">' +
-                comment.text + '</td></tr>')
+    def render_diff_comment(self, lineno, comments):
+        return render_diff_comment(lineno, comments)
 
     def _wrap_code_line(self, code_line):
         style = []
@@ -325,3 +323,26 @@ class TableFormatter(HtmlFormatter):
         # ignored by HTML parsers
         return ('<pre' + (style and ' style="%s"' % style) + '><span></span>' +
                 code_line + '</pre>')
+
+
+def render_diff_comment(lineno, comments):
+    lines = []
+    lines.append('<tr><td colspan="2" class="diff-comment">')
+    for c in comments:
+        panel = '''
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <a href="/users/{user}">{user}</a> commented
+            <span title="{timestamp}">{human_timestamp}</span></div>
+          <div class="panel-body">
+            {comment}
+          </div>
+        </div>
+        '''.format(
+            user=c.user.nickname,
+            timestamp=c.created_at,
+            human_timestamp=arrow.get(c.created_at).humanize(),
+            comment=c.text)
+        lines.append(panel)
+    lines.append('</td></tr>')
+    return ''.join(lines)

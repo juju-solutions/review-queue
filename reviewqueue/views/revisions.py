@@ -10,6 +10,7 @@ from pyramid.view import view_config
 
 from ..db import DB
 from .. import models as M
+from .. import helpers as h
 
 
 def includeme(config):
@@ -112,6 +113,7 @@ def revision_comment(request):
 @view_config(
     route_name='revision_diff_comment',
     permission='comment',
+    renderer='json',
 )
 def revision_diff_comment(request):
     """Comment/vote on a line of a Revision file diff
@@ -132,7 +134,9 @@ def revision_diff_comment(request):
     )
     revision.diff_comments.append(diff_comment)
 
-    return HTTPOk()
+    return {
+        'html': h.render_diff_comment(line_start, [diff_comment])
+    }
 
 
 @view_config(

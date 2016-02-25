@@ -83,8 +83,7 @@ $(function() {
     }).done(function(data) {
       if(data.error) {
       } else {
-        var comment_html = '<td colspan="2" class="diff-comment">' + comment + '</td>';
-        form.closest('tr').html(comment_html);
+        form.closest('tr').replaceWith(data.html);
       }
     });
   });
