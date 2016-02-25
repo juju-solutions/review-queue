@@ -25,6 +25,11 @@ $(function() {
 
   $('table.highlighttable tr').on('mouseenter', function() {
     var self = $(this);
+    // abort if we're already showing a comment box for this row
+    if (self.next().find('#diffCommentForm').length) {
+      return;
+    }
+
     var td = self.find('td.linenos');
 
     var btn_html =
@@ -42,5 +47,49 @@ $(function() {
 
   $('td.linenos .btn.add-diff-comment').on('mouseover', function(event) {
     $(this).remove();
+  });
+
+  $('td.linenos').on('click', '.btn.add-diff-comment', function(event) {
+    var tr = $(this).closest('tr');
+    $(this).remove();
+    var newRow =
+      `<tr><td colspan="2" class="diff-comment">
+        <form id="diffCommentForm">
+          <div class="form-group">
+            <textarea autofocus name="comment" class="form-control" rows="5" required></textarea>
+          </div>
+          <div class="form-inline">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button class="btn btn-default diff-comment-cancel">Cancel</button>
+          </div>
+        </form>
+      </td></tr>`;
+    tr.after(newRow);
+  });
+
+  $('table.highlighttable').on('submit', '#diffCommentForm', function(event) {
+    event.preventDefault();
+
+    var form = $(this);
+    var comment = form.find('textarea').val();
+    var line_start = form.closest('tr').prev().find('td.linenos pre').text();
+    var filename = form.closest('table').prev('h3').text();
+    var revision_id = $('#revision-id').text();
+
+    $.post("/revisions/" + revision_id + "/diff_comment", {
+      comment: comment,
+      line_start: line_start,
+      filename: filename
+    }).done(function(data) {
+      if(data.error) {
+      } else {
+        var comment_html = '<td colspan="2" class="diff-comment">' + comment + '</td>';
+        form.closest('tr').html(comment_html);
+      }
+    });
+  });
+
+  $('table.highlighttable').on('click', '.btn.diff-comment-cancel', function(event) {
+    $(this).closest('tr').remove();
   });
 });

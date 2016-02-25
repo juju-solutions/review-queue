@@ -201,6 +201,7 @@ class Revision(Base):
 
     tests = relationship('RevisionTest', backref=backref('revision'))
     comments = relationship('Comment', backref=backref('revision'))
+    diff_comments = relationship('DiffComment', backref=backref('revision'))
 
     def add_comment(self, comment):
         self.comments.append(comment)
@@ -349,6 +350,17 @@ class Comment(Base):
     @property
     def human_vote(self):
         return h.human_vote(self.vote)
+
+
+class DiffComment(Base):
+    revision_id = Column(Integer, ForeignKey('revision.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+
+    text = Column(Text)
+    line_start = Column(Integer)
+    filename = Column(Text)
+
+    user = relationship('User')
 
 
 class Policy(Base):

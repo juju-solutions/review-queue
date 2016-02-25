@@ -29,6 +29,7 @@ form#login {
   margin: 0;
 }
 
+/*
 .diff {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
@@ -45,6 +46,7 @@ form#login {
 .diff_sub, .policyStatus2 {
   background-color: #ffecec;
 }
+*/
 table.highlighttable {
   min-width: 800px;
   width: 100%;
@@ -67,4 +69,9 @@ td.linenos .btn.add-diff-comment {
 }
 td.code {
   padding-left: 12px;
+}
+td.diff-comment {
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
 }

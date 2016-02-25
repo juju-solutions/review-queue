@@ -20,6 +20,9 @@ def includeme(config):
         'revision_comment', '/revisions/{id}/comment',
         factory=RevisionFactory, traverse='/{id}')
     config.add_route(
+        'revision_diff_comment', '/revisions/{id}/diff_comment',
+        factory=RevisionFactory, traverse='/{id}')
+    config.add_route(
         'revision_policy', '/revisions/{id}/policy',
         factory=RevisionFactory, traverse='/{id}')
 
@@ -104,6 +107,32 @@ def revision_comment(request):
 
     return HTTPFound(location=request.route_url(
         'reviews_show', id=revision.review.id))
+
+
+@view_config(
+    route_name='revision_diff_comment',
+    permission='comment',
+)
+def revision_diff_comment(request):
+    """Comment/vote on a line of a Revision file diff
+
+    POST /revisions/:id/diff_comment
+
+    """
+    revision = request.context
+    comment_text = request.params.get('comment')
+    line_start = int(request.params.get('line_start'))
+    filename = request.params.get('filename')
+
+    diff_comment = M.DiffComment(
+        text=comment_text,
+        line_start=line_start,
+        filename=filename,
+        user=request.user,
+    )
+    revision.diff_comments.append(diff_comment)
+
+    return HTTPOk()
 
 
 @view_config(

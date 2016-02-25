@@ -145,10 +145,20 @@
 </table>
 </form>
 
+<% diff_comments = review.latest_revision.diff_comments %>
 % for change in review.get_diff(request.registry.settings).get_changes():
-  <% diff = change.pygments_diff(context=True) %>
+  <%
+    change_diff_comments = {}
+    for d in diff_comments:
+        if d.filename == change.description:
+            change_diff_comments.setdefault(d.line_start, []).append(d)
+
+    diff = change.pygments_diff(change_diff_comments, context=True)
+  %>
   % if diff:
   <h3>${change.description}</h3>
   ${diff | n}
   % endif
 % endfor
+
+<div id="revision-id">${review.latest_revision.id}</div>

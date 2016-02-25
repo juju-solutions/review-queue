@@ -209,7 +209,7 @@ class Change(object):
 
         return diff
 
-    def pygments_diff(self, **kw):
+    def pygments_diff(self, comments, **kw):
         from pygments import highlight
         from pygments.lexers import DiffLexer
 
@@ -232,7 +232,7 @@ class Change(object):
         return highlight(
             diff_text,
             DiffLexer(),
-            TableFormatter(linenos="table"))
+            TableFormatter(linenos="table", comments=comments))
 
     def _get_lines(self, filename):
         if not filename:
@@ -241,6 +241,10 @@ class Change(object):
 
 
 class TableFormatter(HtmlFormatter):
+    def __init__(self, *args, **kw):
+        self.comments = kw.pop('comments', {}) or {}
+        super(TableFormatter, self).__init__(*args, **kw)
+
     def _wrap_tablelinenos(self, inner):
         dummyoutfile = StringIO()
         lncount = 0
@@ -287,20 +291,27 @@ class TableFormatter(HtmlFormatter):
                     lines.append('')
             ls = '\n'.join(lines)
 
-        # in case you wonder about the seemingly redundant <div> here: since the
-        # content in the other cell also is wrapped in a div, some browsers in
-        # some configurations seem to mess up the formatting...
         yield 0, ('<table class="%stable">' % self.cssclass)
-        for lineno, code in itertools.izip(ls.split('\n'), dummyoutfile.getvalue().split('\n')):
+        lineno = fl
+        for lineno_html, code in itertools.izip(ls.split('\n'), dummyoutfile.getvalue().split('\n')):
             if nocls:
                 yield 0, ('<tr><td><pre style="line-height: 125%">' +
-                          lineno + '</pre></td><td class="code">' +
+                          lineno_html + '</pre></td><td class="code">' +
                           self._wrap_code_line(code) + '</td></tr>')
             else:
                 yield 0, ('<tr><td class="linenos"><pre>' +
-                          lineno + '</pre></td><td class="code">' +
+                          lineno_html + '</pre></td><td class="code">' +
                           self._wrap_code_line(code) + '</td></tr>')
+            if lineno in self.comments:
+                for c in self.comments[lineno]:
+                    yield 0, self.render_diff_comment(c)
+
+            lineno += 1
         yield 0, '</table>'
+
+    def render_diff_comment(self, comment):
+        return ('<tr><td colspan="2" class="diff-comment">' +
+                comment.text + '</td></tr>')
 
     def _wrap_code_line(self, code_line):
         style = []
