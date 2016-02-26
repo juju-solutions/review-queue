@@ -91,4 +91,8 @@ $(function() {
   $('table.highlighttable').on('click', '.btn.diff-comment-cancel', function(event) {
     $(this).closest('tr').remove();
   });
+
+  $('.test-detail-toggle').on('click', function(event) {
+    $(this).closest('tr').next().toggle();
+  });
 });

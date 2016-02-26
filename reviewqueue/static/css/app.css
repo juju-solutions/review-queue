@@ -75,3 +75,6 @@ td.diff-comment {
   border-bottom: 1px solid #ccc;
   padding: 10px;
 }
+.test-detail {
+  display: none;
+}

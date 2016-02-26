@@ -32,8 +32,8 @@
         <td>${test.substrate}</td>
         <td>${test.status}</td>
         <td>
-          % if test.url:
-            <a href="${test.url}console">${test.url}console</a>
+          % if test.results:
+            <a href="${request.route_url('revision_tests_show', id=test.id)}">Test Results</a>
           % endif
         </td>
         <td>${self.human_date(test.updated_at or test.created_at)}</td>

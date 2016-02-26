@@ -36,7 +36,7 @@ def refresh_review(review):
 def refresh_reviews():
     active = (
         M.DBSession.query(M.Review)
-        .filter(~M.Review.state.in_([
+        .filter(~M.Review.status.in_([
             'CLOSED',
         ]))
     )

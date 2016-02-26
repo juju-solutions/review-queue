@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import zipfile
 
@@ -14,6 +15,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Text,
+    func,
     )
 
 from sqlalchemy.orm import (
@@ -21,10 +23,13 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.orderinglist import ordering_list
 
 from .base import Base, DBSession
 from .. import helpers as h
+
+log = logging.getLogger(__name__)
 
 
 def make_enum(name, *fields):
@@ -101,7 +106,7 @@ class Review(Base):
         """Check for and download new source revisions for this review.
 
         """
-        cs = h.charmStore(settings)
+        cs = h.charmstore(settings)
         charmstore_entity = h.get_charmstore_entity(cs, self.source_url)
         remote_revisions = (
             charmstore_entity['Meta']['revision-info']['Revisions'])
@@ -129,6 +134,7 @@ class RevisionTest(Base):
     status = Column(Text)  # RETRY, PENDING, PASS, FAIL
     substrate = Column(Text)
     url = Column(Text)
+    results = Column(JSONB)
     finished = Column(DateTime)
 
     user = relationship('User')
@@ -137,6 +143,9 @@ class RevisionTest(Base):
         test_url = self.revision.get_test_url()
         if not test_url:
             return
+
+        if not self.id:
+            DBSession.flush()
 
         req_url = settings['testing.jenkins_url']
         callback_url = (
@@ -162,27 +171,30 @@ class RevisionTest(Base):
 
     def try_finish(self):
         """Attempt to find a CI result for this ReviewTest
-        and update the ReviewTest accordingly.
+        and update the ReviewTest accordingly. Download and store
+        result json.
 
         Returns True if successful, else False.
 
         """
-        if self.status != 'RUNNING' or not self.url:
+        if not self.url:
             return False
 
         result_url = '{}artifact/results.json'.format(self.url)
         try:
-            result_data = requests.get(result_url).json()
-        except:
+            self.results = requests.get(result_url).json()
+        except Exception as e:
+            log.exception(
+                "Couldn't get test results from %s: %s", result_url, e)
             return False
 
         passed = all(
             test.get('returncode', 0) == 0
-            for test in result_data.get('tests', {})
+            for test in self.results.get('tests', {})
         )
         self.status = 'PASS' if passed else 'FAIL'
         self.finished = datetime.datetime.strptime(
-            result_data['finished'],
+            self.results['finished'],
             '%Y-%m-%dT%H:%M:%SZ'
         )
 
@@ -235,6 +247,18 @@ class Revision(Base):
             .filter_by(status='RETRY')
         )
 
+    def get_tests_missing_results(self):
+        """Return RevisionTests that have a 'finished' timestamp,
+        but no results json.
+
+        """
+        return (
+            DBSession.query(RevisionTest)
+            .filter_by(revision_id=self.id)
+            .filter(RevisionTest.finished != None)  # noqa
+            .filter(func.jsonb_typeof(RevisionTest.results) == 'null')
+        )
+
     def get_tests_overdue(self, timeout):
         tests = (
             DBSession.query(RevisionTest)
@@ -247,7 +271,7 @@ class Revision(Base):
         now = datetime.datetime.utcnow()
         return [
             t for t in tests
-            if (now - t.updated).total_seconds() > timeout
+            if (now - (t.updated_at or t.created_at)).total_seconds() > timeout
         ]
 
     def refresh_tests(self, settings):
@@ -261,6 +285,9 @@ class Revision(Base):
                 if t.try_finish():
                     continue
             t.send_ci_request(settings)
+
+        for t in self.get_tests_missing_results():
+            t.try_finish()
 
     def create_tests(self, settings, substrates=None):
         substrates = (

@@ -24,6 +24,9 @@ class DB(object):
     def get_revision(self, **kw):
         return self._get_object(M.Revision, **kw)
 
+    def get_revision_test(self, **kw):
+        return self._get_object(M.RevisionTest, **kw)
+
     def create_review(
             self, user, source_url, description, charmstore_entity, settings):
         revision_urls = charmstore_entity['Meta']['revision-info']['Revisions']

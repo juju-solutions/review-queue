@@ -25,7 +25,7 @@ celery.conf.update(
     CELERYBEAT_SCHEDULE={
         'refresh_reviews': {
             'task': 'reviewqueue.tasks.refresh_reviews',
-            'schedule': timedelta(seconds=300),
+            'schedule': timedelta(seconds=60),
         },
     },
 )

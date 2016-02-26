@@ -60,3 +60,4 @@ target/
 .venv/
 **node_modules/
 lp-creds
+celerybeat-schedule
