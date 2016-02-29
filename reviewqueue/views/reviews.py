@@ -125,10 +125,27 @@ def show(request):
     """
     review = request.context
 
+    db = DB()
+    revision_id = request.params.get('revision')
+    revision = (
+        db.get_revision(
+            id=int(revision_id),
+            review_id=review.id) or review.latest_revision
+        if revision_id else review.latest_revision)
+
+    diff_revision_id = request.params.get('diff_revision')
+    diff_revision = (
+        db.get_revision(
+            id=int(diff_revision_id),
+            review_id=review.id)
+        if diff_revision_id else None)
+
     substrates = request.registry.settings.get('testing.substrates', '')
     substrates = [s.strip() for s in substrates.split(',')]
     return {
         'review': review,
+        'revision': revision,
+        'diff_revision': diff_revision,
         'substrates': substrates,
         'policy_checklist': M.DBSession.query(M.Policy),
     }

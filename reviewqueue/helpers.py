@@ -80,7 +80,7 @@ class Diff(object):
         if not self.from_dir:
             tmp_from_dir = tempfile.mkdtemp()
 
-        changes = dircmp(
+        changes = custom_dircmp(
             tmp_from_dir or self.from_dir,
             self.to_dir).report_full_closure_changes()
 
@@ -94,11 +94,24 @@ class Diff(object):
         ]
 
 
-class dircmp(filecmp.dircmp):
+class custom_dircmp(filecmp.dircmp):
+    def __init__(self, *args, **kw):
+        filecmp.dircmp.__init__(self, *args, **kw)
+        self.methodmap['subdirs'] = custom_dircmp.phase4
+
     def phase3(self):
         xx = filecmp.cmpfiles(
             self.left, self.right, self.common_files, shallow=False)
         self.same_files, self.diff_files, self.funny_files = xx
+
+    def phase4(self):
+        # This method is identical to the one built-in to python, but we
+        # have to override it so that subdirs use our custom dircmp class
+        self.subdirs = {}
+        for x in self.common_dirs:
+            a_x = os.path.join(self.left, x)
+            b_x = os.path.join(self.right, x)
+            self.subdirs[x] = custom_dircmp(a_x, b_x, self.ignore, self.hide)
 
     def report_full_closure_changes(self):
         # Report on self and subdirs recursively

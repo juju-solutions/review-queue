@@ -114,17 +114,11 @@ class Review(Base):
         new_revisions = (
             remote_revisions[0:remote_revisions.index(current_revision)])
         if new_revisions:
-            self.revisions = (
-                [Revision(revision_url=url) for url in new_revisions] +
-                self.revisions
-            )
+            for url in reversed(new_revisions):
+                self.revisions.insert(0, Revision(revision_url=url))
             self.status = Status.NEEDS_REVIEW
             self.vote = 0
             self.create_tests(settings)
-
-    def get_diff(self, settings):
-        prior_revision = self.revisions[-1] if self.promulgated else None
-        return self.latest_revision.get_diff(prior_revision, settings)
 
 
 class RevisionTest(Base):
@@ -214,6 +208,19 @@ class Revision(Base):
     tests = relationship('RevisionTest', backref=backref('revision'))
     comments = relationship('Comment', backref=backref('revision'))
     diff_comments = relationship('DiffComment', backref=backref('revision'))
+
+    @property
+    def shortname(self):
+        return self.revision_url.split('/')[-1]
+
+    @property
+    def prior(self):
+        return (
+            DBSession.query(Revision)
+            .filter_by(review_id=self.review.id)
+            .filter_by(_position=self._position + 1)
+            .first()
+        )
 
     def add_comment(self, comment):
         self.comments.append(comment)
@@ -316,7 +323,12 @@ class Revision(Base):
         cs = h.charmstore(settings)
         return cs.archive_url(revision_url)
 
-    def get_diff(self, prior_revision, settings):
+    def get_diff(self, settings, prior_revision=None):
+        if not prior_revision:
+            prior_revision = (
+                self.review.revisions[-1]
+                if self.review.promulgated else None)
+
         to_dir, from_dir = self.fetch_source(settings), None
         if prior_revision:
             from_dir = prior_revision.fetch_source(settings)

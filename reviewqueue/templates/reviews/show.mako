@@ -11,6 +11,20 @@
 
 <hr>
 
+<ul class="nav nav-tabs">
+  % for i, rev in enumerate(review.revisions):
+  <li role="presentation" class="${'active' if rev == revision else ''}">
+    <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':rev.id})}">
+      % if i == 0:
+        <span title="${rev.shortname}">Latest revision</span>
+      % else:
+        ${rev.shortname}
+      % endif
+    </a>
+  </li>
+  % endfor
+</ul>
+
 <h2>Tests</h2>
 <table class="table">
   <thead>
@@ -22,12 +36,12 @@
     </tr>
   </thead>
   <tbody>
-    % if not review.latest_revision.tests:
+    % if not revision.tests:
     <tr>
       <td colspan="4">No tests have been run.</td>
     </tr>
     % else:
-      % for test in review.latest_revision.tests:
+      % for test in revision.tests:
       <tr>
         <td>${test.substrate}</td>
         <td>${test.status}</td>
@@ -45,7 +59,7 @@
 
 % if request.user and request.user.is_charmer:
 <form method="post"
-      action="${request.route_url('revision_test', id=review.latest_revision.id)}"
+      action="${request.route_url('revision_test', id=revision.id)}"
       class="form-inline">
   <select name="substrate" class="form-control">
     % for substrate in substrates:
@@ -59,7 +73,7 @@
 
 <hr>
 
-%for comment in review.latest_revision.comments:
+%for comment in revision.comments:
 <div class="panel panel-default">
   <div class="panel-heading">
     <div class="pull-right"><strong>Voted:</strong> ${comment.human_vote}</div>
@@ -74,7 +88,7 @@
 <h3>Add Comment</h3>
 % if request.user:
 <form method="post"
-      action="${request.route_url('revision_comment', id=review.latest_revision.id)}">
+      action="${request.route_url('revision_comment', id=revision.id)}">
   <div class="form-group">
     <textarea name="comment" class="form-control" rows="5" required></textarea>
   </div>
@@ -124,19 +138,19 @@
   </thead>
   <tbody>
     % for policy in policy_checklist:
-    <% policy_check = review.latest_revision.get_policy_check_for(policy.id) %>
+    <% policy_check = revision.get_policy_check_for(policy.id) %>
     <tr class="${'policyStatus{}'.format(policy_check.status) if policy_check else ''}">
       <td>${policy.description}</td>
       <td><input type="radio" name="policy${policy.id}" value="0"
-            data-revision-id="${review.latest_revision.id}"
+            data-revision-id="${revision.id}"
             data-policy-id="${policy.id}"
             ${"checked" if not policy_check or policy_check.unreviewed else ""}></td>
       <td><input type="radio" name="policy${policy.id}" value="1"
-            data-revision-id="${review.latest_revision.id}"
+            data-revision-id="${revision.id}"
             data-policy-id="${policy.id}"
             ${"checked" if policy_check and policy_check.passing else ""}></td>
       <td><input type="radio" name="policy${policy.id}" value="2"
-            data-revision-id="${review.latest_revision.id}"
+            data-revision-id="${revision.id}"
             data-policy-id="${policy.id}"
             ${"checked" if policy_check and policy_check.failing else ""}></td>
     </tr>
@@ -145,8 +159,21 @@
 </table>
 </form>
 
-<% diff_comments = review.latest_revision.diff_comments %>
-% for change in review.get_diff(request.registry.settings).get_changes():
+<hr>
+
+% if revision.prior:
+<div class="pull-right">
+  % if not diff_revision:
+    All changes | <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':revision.id, 'diff_revision':revision.prior.id})}">Changes since last revision</a>
+  % else:
+    <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':revision.id})}">All changes</a> | Changes since last revision
+  % endif
+</div>
+% endif
+<h2>Source Diff</h2>
+
+<% diff_comments = revision.diff_comments %>
+% for change in revision.get_diff(request.registry.settings, prior_revision=diff_revision).get_changes():
   <%
     change_diff_comments = {}
     for d in diff_comments:
@@ -161,4 +188,4 @@
   % endif
 % endfor
 
-<div id="revision-id">${review.latest_revision.id}</div>
+<div id="revision-id" style="display:none">${revision.id}</div>
