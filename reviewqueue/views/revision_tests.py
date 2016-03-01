@@ -5,8 +5,8 @@ from pyramid.security import Allow
 from pyramid.security import Everyone
 from pyramid.view import view_config
 
-from ..db import DB
 from .. import tasks
+from .. import models as M
 
 
 def includeme(config):
@@ -29,7 +29,7 @@ class RevisionTestFactory(object):
         self.request = request
 
     def __getitem__(self, key):
-        revision_test = DB().get_revision_test(id=key)
+        revision_test = M.RevisionTest.get(key)
         if not revision_test:
             raise KeyError(
                 "No revision test with id '%s'" % key)

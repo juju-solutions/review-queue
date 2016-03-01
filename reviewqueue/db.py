@@ -6,26 +6,8 @@ class DB(object):
     def __init__(self):
         self.session = M.DBSession()
 
-    def _get_object(self, klass, **kw):
-        return self.session.query(klass) \
-            .filter_by(**kw) \
-            .first()
-
     def flush(self):
         self.session.flush()
-
-    def get_review(self, **kw):
-        return self._get_object(M.Review, **kw)
-
-    def get_reviews(self):
-        return self.session.query(M.Review) \
-            .order_by(M.Review.created_at)
-
-    def get_revision(self, **kw):
-        return self._get_object(M.Revision, **kw)
-
-    def get_revision_test(self, **kw):
-        return self._get_object(M.RevisionTest, **kw)
 
     def create_review(
             self, user, source_url, description, charmstore_entity, settings):
@@ -59,9 +41,6 @@ class DB(object):
 
         review.create_tests(settings)
         return review
-
-    def get_user(self, **kw):
-        return self._get_object(M.User, **kw)
 
     def create_user(self, settings, **kw):
         lp = h.get_lp()

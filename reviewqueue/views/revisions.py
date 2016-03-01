@@ -8,7 +8,6 @@ from pyramid.security import Authenticated
 from pyramid.security import Everyone
 from pyramid.view import view_config
 
-from ..db import DB
 from .. import models as M
 from .. import helpers as h
 
@@ -38,7 +37,7 @@ class RevisionFactory(object):
         self.request = request
 
     def __getitem__(self, key):
-        revision = DB().get_revision(id=key)
+        revision = M.Revision.get(key)
         if not revision:
             raise KeyError(
                 "No revision with id '%s'" % key)

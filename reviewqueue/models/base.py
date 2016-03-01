@@ -30,5 +30,16 @@ class Base(object):
         for k, v in kw.items():
             setattr(self, k, v)
 
+    @classmethod
+    def get(cls, *args, **kw):
+        if args:
+            return DBSession.query(cls).get(*args)
+
+        return (
+            DBSession.query(cls)
+            .filter_by(**kw)
+            .first()
+        )
+
 
 Base = declarative_base(cls=Base)

@@ -75,6 +75,15 @@ class Review(Base):
         backref='review', order_by='Revision._position',
         collection_class=ordering_list('_position'))
 
+    @classmethod
+    def get_active_reviews(cls):
+        return (
+            DBSession.query(cls)
+            .filter(~cls.status.in_([
+                'CLOSED',
+            ]))
+        )
+
     @property
     def age(self):
         return datetime.datetime.utcnow() - self.created_at
@@ -119,6 +128,19 @@ class Review(Base):
             self.status = Status.NEEDS_REVIEW
             self.vote = 0
             self.create_tests(settings)
+
+    def close(self):
+        """Close this Review
+
+        """
+        self.status = 'CLOSED'
+
+    def promulgate(self):
+        """Close this Review and promulgate the charm
+
+        """
+        #TODO do the promulgation
+        self.status = 'PROMULGATED'
 
 
 class RevisionTest(Base):

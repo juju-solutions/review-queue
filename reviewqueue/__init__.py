@@ -12,11 +12,7 @@ from pyramid.session import SignedCookieSessionFactory
 from sqlalchemy import engine_from_config
 
 from . import helpers
-from .db import DB
-from .models import (
-    DBSession,
-    Base,
-    )
+from . import models as M
 
 
 def add_renderer_globals(event):
@@ -27,6 +23,8 @@ def groupfinder(userid, request):
     user = request.user
     if user is not None:
         groups = ['{0}'.format(userid)]
+        if user.is_charmer:
+            groups.append('charmers')
         return groups
     return None
 
@@ -36,8 +34,7 @@ class CustomRequest(Request):
     def user(self):
         userid = unauthenticated_userid(self)
         if userid is not None:
-            db = DB()
-            return db.get_user(id=userid)
+            return M.User.get(userid)
         return None
 
 
@@ -54,8 +51,8 @@ def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
-    DBSession.configure(bind=engine)
-    Base.metadata.bind = engine
+    M.DBSession.configure(bind=engine)
+    M.Base.metadata.bind = engine
 
     authn_policy = AuthTktAuthenticationPolicy(
         settings['auth.secret'],

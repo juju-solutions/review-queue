@@ -34,11 +34,5 @@ def refresh_review(review):
 
 @celery.task
 def refresh_reviews():
-    active = (
-        M.DBSession.query(M.Review)
-        .filter(~M.Review.status.in_([
-            'CLOSED',
-        ]))
-    )
-    for a in active:
+    for a in M.Review.get_active_reviews():
         refresh_review.delay(a)

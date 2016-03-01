@@ -21,20 +21,24 @@ def includeme(config):
         'reviews_create', '/reviews/create', factory=ReviewFactory)
     config.add_route(
         'reviews_show', '/reviews/{id}',
-        factory=ReviewFactory, traverse='/{id}')
+        factory=ReviewFactory, traverse='/{id}', request_method="GET")
+    config.add_route(
+        'review_update', '/reviews/{id}',
+        factory=ReviewFactory, traverse='/{id}', request_method="POST")
 
 
 class ReviewFactory(object):
     __acl__ = [
         (Allow, Everyone, 'view'),
         (Allow, Authenticated, 'create'),
+        (Allow, 'charmers', 'update'),
     ]
 
     def __init__(self, request):
         self.request = request
 
     def __getitem__(self, key):
-        review = DB().get_review(id=key)
+        review = M.Review.get(key)
         if not review:
             raise KeyError(
                 "No review with id '%s'" % key)
@@ -55,10 +59,8 @@ def index(request):
     GET /reviews
 
     """
-    db = DB()
-
     return {
-        'reviews': db.get_reviews(),
+        'reviews': M.Review.get_active_reviews(),
     }
 
 
@@ -125,17 +127,16 @@ def show(request):
     """
     review = request.context
 
-    db = DB()
     revision_id = request.params.get('revision')
     revision = (
-        db.get_revision(
+        M.Revision.get(
             id=int(revision_id),
             review_id=review.id) or review.latest_revision
         if revision_id else review.latest_revision)
 
     diff_revision_id = request.params.get('diff_revision')
     diff_revision = (
-        db.get_revision(
+        M.Revision.get(
             id=int(diff_revision_id),
             review_id=review.id)
         if diff_revision_id else None)
@@ -149,3 +150,22 @@ def show(request):
         'substrates': substrates,
         'policy_checklist': M.DBSession.query(M.Policy),
     }
+
+
+@view_config(
+    route_name='review_update',
+    permission='update',
+)
+def update(request):
+    """Update a Review
+
+    Specifically, Close or Promulgate a review.
+
+    POST /reviews/:id
+
+    """
+    review = request.context
+    action = request.params.get('action')
+    getattr(review, action)()
+
+    return HTTPFound(location=request.route_url('reviews_index'))

@@ -6,6 +6,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from ..db import DB
+from .. import models as M
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ def login_callback(request):
     )
 
     db = DB()
-    user = db.get_user(openid_claimed_id=user_data['openid_claimed_id'])
+    user = M.User.get(openid_claimed_id=user_data['openid_claimed_id'])
 
     if user:
         user.update(**user_data)

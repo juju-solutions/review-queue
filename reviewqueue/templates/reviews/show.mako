@@ -1,5 +1,18 @@
 <%inherit file="../base.mako"/>
 
+% if request.user.is_charmer:
+<div class="pull-right">
+  <form action="${request.route_url('review_update', id=review.id)}" method="post">
+    <button type="submit" name="action" class="btn btn-default"
+      value="close" title="Close this review without promulgation">Close</button>
+    % if review.status == 'APPROVED':
+    <button type="submit" name="action" class="btn btn-default"
+      value="promulgate" title="Close this review and automatically promulgate the charm">Promulgate</button>
+    % endif
+  </form>
+</div>
+% endif
+
 <h1>${review.source_url}</h1>
 <p>
   <strong>Status:</strong> ${review.human_status}<br>

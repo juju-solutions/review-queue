@@ -2,7 +2,7 @@ from pyramid.security import Allow
 from pyramid.security import Everyone
 from pyramid.view import view_config
 
-from ..db import DB
+from .. import models as M
 
 
 def includeme(config):
@@ -20,7 +20,7 @@ class UserFactory(object):
         self.request = request
 
     def __getitem__(self, key):
-        user = DB().get_user(nickname=key)
+        user = M.User.get(nickname=key)
         if not user:
             raise KeyError(
                 "No user with nickname '%s'" % key)
