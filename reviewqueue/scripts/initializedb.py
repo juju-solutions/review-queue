@@ -11,6 +11,7 @@ import sqlalchemy
 from sqlalchemy import engine_from_config
 from sqlalchemy_utils import (
     create_database,
+    drop_database,
     database_exists,
 )
 
@@ -41,7 +42,8 @@ def main():
 
     M.DBSession.configure(bind=engine)
     if args.force:
-        M.Base.metadata.drop_all(engine)
+		drop_database(engine.url)
+		create_database(engine.url)
     M.Base.metadata.create_all(engine)
 
     if args.force:

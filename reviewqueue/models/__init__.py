@@ -9,4 +9,4 @@ from .review import User  # noqa
 from .review import Comment  # noqa
 from .review import DiffComment  # noqa
 from .review import Policy  # noqa
-from .review import RevisionPolicyCheck  # noqa
+from .review import ReviewPolicyCheck  # noqa

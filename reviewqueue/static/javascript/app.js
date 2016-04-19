@@ -19,6 +19,9 @@ $(function() {
     }).done(function(data) {
       if(data.error) {
       } else {
+        $('#policy-' + policy_id + '-user').html(data.user);
+        $('#policy-' + policy_id + '-revision').html(data.revision);
+        $('#policy-' + policy_id + '-timestamp').html(data.timestamp);
       }
     });
   });

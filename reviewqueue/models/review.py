@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import subprocess
 import zipfile
 
 import requests
@@ -84,6 +85,14 @@ class Review(Base):
             ]))
         )
 
+    def get_policy_check_for(self, policy_id):
+        return (
+            DBSession.query(ReviewPolicyCheck)
+            .filter_by(review_id=self.id)
+            .filter_by(policy_id=policy_id)
+            .first()
+        )
+
     @property
     def age(self):
         return datetime.datetime.utcnow() - self.created_at
@@ -98,7 +107,7 @@ class Review(Base):
 
     @property
     def latest_revision(self):
-        #TODO use query instead
+        # TODO use query instead
         return self.revisions[0] if self.revisions else None
 
     def create_tests(self, settings, substrates=None):
@@ -139,8 +148,16 @@ class Review(Base):
         """Close this Review and promulgate the charm
 
         """
-        #TODO do the promulgation
-        self.status = 'PROMULGATED'
+        cmd = ['charm']
+        if self.promulgated:
+            # publish
+            cmd.extend(['publish', self.latest_revision.revision_url])
+        else:
+            # promulgate
+            cmd.extend(['promulgate', self.source_url])
+
+        if subprocess.call(cmd) == 0:
+            self.status = 'PROMULGATED'
 
 
 class RevisionTest(Base):
@@ -257,14 +274,6 @@ class Revision(Base):
 
         if comment.vote > 1 or self.review.vote > 1:
             self.review.status = Status.APPROVED
-
-    def get_policy_check_for(self, policy_id):
-        return (
-            DBSession.query(RevisionPolicyCheck)
-            .filter_by(revision_id=self.id)
-            .filter_by(policy_id=policy_id)
-            .first()
-        )
 
     def get_test_url(self):
         return self.revision_url
@@ -428,11 +437,16 @@ class Policy(Base):
     description = Column(Text)
 
 
-class RevisionPolicyCheck(Base):
+class ReviewPolicyCheck(Base):
+    review_id = Column(Integer, ForeignKey('review.id'))
     revision_id = Column(Integer, ForeignKey('revision.id'))
     policy_id = Column(Integer, ForeignKey('policy.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
 
     status = Column(Integer)
+
+    user = relationship('User')
+    revision = relationship('Revision')
 
     @property
     def unreviewed(self):

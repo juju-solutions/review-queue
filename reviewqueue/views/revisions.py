@@ -1,7 +1,6 @@
 from pyramid.httpexceptions import (
     HTTPUnauthorized,
     HTTPFound,
-    HTTPOk,
 )
 from pyramid.security import Allow
 from pyramid.security import Authenticated
@@ -141,6 +140,7 @@ def revision_diff_comment(request):
 @view_config(
     route_name='revision_policy',
     permission='comment',
+    renderer='json',
 )
 def revision_policy(request):
     """Set the status of a RevisionPolicyCheck
@@ -149,16 +149,24 @@ def revision_policy(request):
 
     """
     revision = request.context
+    review = revision.review
     policy_id = int(request.params.get('policy_id'))
     status = int(request.params.get('status', 0))
 
-    policy_check = revision.get_policy_check_for(policy_id)
+    policy_check = review.get_policy_check_for(policy_id)
     if not policy_check:
-        policy_check = M.RevisionPolicyCheck(
+        policy_check = M.ReviewPolicyCheck(
+            review_id=review.id,
             revision_id=revision.id,
-            policy_id=policy_id
+            policy_id=policy_id,
+            user_id=request.user.id,
         )
         M.DBSession().add(policy_check)
     policy_check.status = status
 
-    return HTTPOk()
+    return {
+        'revision': revision.shortname,
+        'user': request.user.nickname,
+        'timestamp': h.arrow.get(
+            policy_check.updated_at or policy_check.created_at).humanize()
+    }

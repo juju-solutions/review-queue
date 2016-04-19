@@ -1,6 +1,6 @@
 <%inherit file="../base.mako"/>
 
-% if request.user.is_charmer:
+% if request.user and request.user.is_charmer:
 <div class="pull-right">
   <form action="${request.route_url('review_update', id=review.id)}" method="post">
     <button type="submit" name="action" class="btn btn-default"
@@ -151,7 +151,7 @@
   </thead>
   <tbody>
     % for policy in policy_checklist:
-    <% policy_check = revision.get_policy_check_for(policy.id) %>
+    <% policy_check = review.get_policy_check_for(policy.id) %>
     <tr class="${'policyStatus{}'.format(policy_check.status) if policy_check else ''}">
       <td>${policy.description}</td>
       <td><input type="radio" name="policy${policy.id}" value="0"
@@ -166,6 +166,9 @@
             data-revision-id="${revision.id}"
             data-policy-id="${policy.id}"
             ${"checked" if policy_check and policy_check.failing else ""}></td>
+      <td id="policy-${policy.id}-user">${policy_check.user.nickname if policy_check else ''}</td>
+      <td id="policy-${policy.id}-revision">${policy_check.revision.shortname if policy_check else ''}</td>
+      <td id="policy-${policy.id}-timestamp">${self.human_date(policy_check.updated_at or policy_check.created_at) if policy_check else ''}</td>
     </tr>
     % endfor
   </tbody>
