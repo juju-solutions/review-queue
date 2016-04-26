@@ -46,15 +46,17 @@ def charmstore(settings):
 
 
 def get_charmstore_entity(
-        charmstore, entity_id, includes=None, get_files=False):
+        charmstore, entity_id, includes=None, get_files=False,
+        channel=None):
     includes = includes or [
         'revision-info',
         'promulgated',
-        'id-name'
+        'id-name',
+        'owner',
     ]
     if get_files:
         includes.append('manifest')
-    return charmstore._meta(entity_id, includes)
+    return charmstore._meta(entity_id, includes, channel=channel)
 
 
 def download_file(url):

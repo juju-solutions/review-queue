@@ -29,7 +29,8 @@ def refresh_review(review):
     with transaction.manager:
         M.DBSession.add(review)
         review.refresh_tests(celery.settings)
-        review.refresh_revisions(celery.settings)
+        if review.channel:
+            review.refresh_revisions(celery.settings)
 
 
 @celery.task

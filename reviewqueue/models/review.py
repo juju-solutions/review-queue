@@ -67,6 +67,7 @@ class Review(Base):
     description = Column(Text)
     vote = Column(Integer, default=0)
     charm_name = Column(Text)
+    channel = Column(Text)
     status = Column(Enum(*Status._fields, name='Status'))
     promulgated = Column(Boolean)
 
@@ -125,7 +126,9 @@ class Review(Base):
 
         """
         cs = h.charmstore(settings)
-        charmstore_entity = h.get_charmstore_entity(cs, self.source_url)
+        charmstore_entity = h.get_charmstore_entity(
+            cs, self.source_url,
+            channel=self.channel)
         remote_revisions = (
             charmstore_entity['Meta']['revision-info']['Revisions'])
         current_revision = self.latest_revision.revision_url
@@ -148,13 +151,12 @@ class Review(Base):
         """Close this Review and promulgate the charm
 
         """
-        cmd = ['charm']
         if self.promulgated:
             # publish
-            cmd.extend(['publish', self.latest_revision.revision_url])
+            cmd = ['charm', 'publish', self.latest_revision.revision_url]
         else:
             # promulgate
-            cmd.extend(['promulgate', self.source_url])
+            cmd = ['jaas', 'promulgate', self.source_url]
 
         if subprocess.call(cmd) == 0:
             self.status = 'PROMULGATED'
@@ -406,6 +408,16 @@ class User(Base):
         return [
             (Allow, self.id, 'edit'),
         ]
+
+    def get_groups(self, settings):
+        lp = h.get_lp()
+        lp_user = lp.load('{}/~{}'.format(
+            settings['launchpad.api.url'],
+            self.nickname),
+        )
+        groups = [t.name for t in (lp_user.super_teams or [])]
+        groups.append(self.nickname)
+        return groups
 
 
 class Comment(Base):

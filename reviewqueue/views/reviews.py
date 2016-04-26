@@ -1,3 +1,5 @@
+import re
+
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 from pyramid.security import Allow
@@ -69,15 +71,110 @@ def index(request):
     renderer='reviews/new.mako',
     permission='create',
 )
-def new(request, errors=None):
+def new(request, validation_result=None):
     """New Review form
 
     GET /reviews/new
 
     """
     return {
-        'errors': errors,
+        'validation_result': validation_result,
     }
+
+
+def validate(request):
+    """Validate a Review Submission
+
+    POST /reviews/validate
+
+    Validation logic:
+
+    Parse url, get revision number if there is one
+    Look up url in charmstore
+        If not found, error (prompt to check perms)
+
+    If charm owner not in user's groups, and user not in ~charmers:
+        Error, can only submit your own charms for review
+
+    If no revision specified:
+        If promulgated, use development channel
+            Re-pull from development channel
+        If not promulgated, use stable channel
+
+    If (revision specified in original url and \
+            revision not latest on channel):
+        If not promulgated:
+            Must review latest, prompt to accept
+        If promulgated:
+            Acceptable, but prompt with option to use latest
+    else:
+        Prompt to confirm revision/channel
+
+    """
+    source_url = request.params['source_url']
+
+    match = re.match(r'^(.*)-(\d+)$', source_url)
+    revision_number = match.group(2) if match else None
+
+    cs = h.charmstore(request.registry.settings)
+    try:
+        charmstore_entity = h.get_charmstore_entity(cs, source_url)
+    except EntityNotFound:
+        return {
+            'error': 'NotFound',
+            'source_url': source_url,
+        }
+
+    charm_owner = charmstore_entity['Meta']['owner']['User']
+    if (charm_owner not in request.user.get_groups(request.registry.settings)
+            and not request.user.is_charmer):
+        return {
+            'error': 'NotOwner',
+            'owner': charm_owner,
+            'source_url': source_url,
+        }
+
+    promulgated = charmstore_entity['Meta']['promulgated']['Promulgated']
+    if not revision_number:
+        if promulgated:
+            channel = 'development'
+            charmstore_entity = h.get_charmstore_entity(
+                cs, source_url, channel=channel)
+        else:
+            channel = 'stable'
+
+        latest_revision_url = (
+            charmstore_entity['Meta']['revision-info']['Revisions'][0])
+        return {
+            'location': 'tip',
+            'source_url': source_url,
+            'channel': channel,
+            'promulgated': promulgated,
+            'charmstore_entity': charmstore_entity,
+            'latest': True,
+            'latest_revision_url': None,
+        }
+    else:
+        latest_revision_url = (
+            charmstore_entity['Meta']['revision-info']['Revisions'][0])
+        match = re.match(r'^(.*)-(\d+)$', latest_revision_url)
+        latest_revision = match.group(2)
+        if revision_number != latest_revision:
+            if not promulgated:
+                return {
+                    'error': 'NotLatestRevision',
+                    'source_url': source_url,
+                    'latest_revision_url': latest_revision_url,
+                }
+        return {
+            'location': 'revision',
+            'source_url': source_url,
+            'channel': None,
+            'promulgated': promulgated,
+            'charmstore_entity': charmstore_entity,
+            'latest': revision_number != latest_revision,
+            'latest_revision_url': latest_revision_url,
+        }
 
 
 @view_config(
@@ -94,13 +191,12 @@ def create(request):
     source_url = request.params['source_url']
     description = request.params.get('description')
 
-    cs = h.charmstore(request.registry.settings)
-    try:
-        charmstore_entity = h.get_charmstore_entity(cs, source_url)
-    except EntityNotFound:
+    result = validate(request)
+
+    if 'error' in result:
         return render_to_response(
             'reviews/new.mako',
-            new(request, errors=['EntityNotFound']),
+            new(request, validation_result=result),
             request=request)
 
     db = DB()
@@ -108,7 +204,9 @@ def create(request):
         request.user,
         source_url,
         description,
-        charmstore_entity,
+        result['charmstore_entity'],
+        result['channel'],
+        result['latest_revision_url'],
         request.registry.settings,
     )
     return HTTPFound(location=request.route_url('reviews_index'))

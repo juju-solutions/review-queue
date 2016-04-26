@@ -10,27 +10,32 @@ class DB(object):
         self.session.flush()
 
     def create_review(
-            self, user, source_url, description, charmstore_entity, settings):
+            self, user, source_url, description, charmstore_entity,
+            channel, latest_revision_url, settings):
+
+        promulgated = charmstore_entity['Meta']['promulgated']['Promulgated']
         revision_urls = charmstore_entity['Meta']['revision-info']['Revisions']
+
         review = M.Review(
             source_url=source_url,
             description=description,
             status=M.Status.NEEDS_REVIEW,
-            promulgated=(
-                charmstore_entity['Meta']['promulgated']['Promulgated']),
+            promulgated=promulgated,
             charm_name=(
                 charmstore_entity['Meta']['id-name']['Name']),
+            channel=channel,
         )
         user.reviews.append(review)
 
         # get the latest revision
         review.revisions.append(
-            M.Revision(revision_url=revision_urls[0])
+            M.Revision(revision_url=(
+                latest_revision_url or revision_urls[0]))
         )
 
-        if review.promulgated:
+        if promulgated:
             # get the promulgated revision to diff against
-            cs = h.charmStore(settings)
+            cs = h.charmstore(settings)
             promulgated_entity = h.get_charmstore_entity(
                 cs, 'cs:{}'.format(review.charm_name))
             promulgated_revision_url = (
