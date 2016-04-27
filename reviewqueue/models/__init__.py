@@ -1,13 +1,17 @@
 from .base import DBSession  # noqa
 from .base import Base  # noqa
 
+from .other import Revision  # noqa
+from .other import RevisionTest  # noqa
+from .other import Status  # noqa
+from .other import User  # noqa
+from .other import Comment  # noqa
+from .other import DiffComment  # noqa
+from .other import Policy  # noqa
+from .other import PolicyCategory  # noqa
+from .other import ReviewPolicyCheck  # noqa
+
+# This must be imported last b/c the history_meta.Versioned
+# mixin requires all related classes to have already been
+# mapped.
 from .review import Review  # noqa
-from .review import Revision  # noqa
-from .review import RevisionTest  # noqa
-from .review import Status  # noqa
-from .review import User  # noqa
-from .review import Comment  # noqa
-from .review import DiffComment  # noqa
-from .review import Policy  # noqa
-from .review import PolicyCategory  # noqa
-from .review import ReviewPolicyCheck  # noqa

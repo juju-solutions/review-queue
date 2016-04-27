@@ -14,7 +14,26 @@ from sqlalchemy.orm import sessionmaker
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
+from .history_meta import versioned_session
+
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+versioned_session(DBSession)
+
+
+def make_enum(name, *fields):
+    from collections import namedtuple
+    return namedtuple(name, fields)(*fields)
+
+
+Status = make_enum(
+    'Status',
+
+    'NEEDS_REVIEW',
+    'NEEDS_FIXING',
+    'APPROVED',
+    'PROMULGATED',
+    'CLOSED',
+)
 
 
 class Base(object):
