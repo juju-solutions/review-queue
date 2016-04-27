@@ -93,7 +93,7 @@
     ${self.user_link(comment.user)} wrote ${self.human_date(comment.created_at)}
   </div>
   <div class="panel-body">
-    ${comment.text}
+    ${comment.text.replace('\n', '<br>') | n}
   </div>
 </div>
 %endfor

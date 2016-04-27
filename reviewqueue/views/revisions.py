@@ -104,6 +104,8 @@ def revision_comment(request):
     if status:
         revision.review.status = status
 
+    comment.email(request)
+
     return HTTPFound(location=request.route_url(
         'reviews_show', id=revision.review.id))
 

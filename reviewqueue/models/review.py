@@ -7,6 +7,7 @@ import zipfile
 import requests
 
 from pyramid.security import Allow
+from pyramid.renderers import render
 
 from sqlalchemy import (
     Boolean,
@@ -432,6 +433,39 @@ class Comment(Base):
     @property
     def human_vote(self):
         return h.human_vote(self.vote)
+
+    def html(self, request):
+        return render(
+            'emails/comment.mako',
+            dict(comment=self, request=request))
+
+    def email(self, request):
+        recipients = {
+            c.user.email
+            for rev in self.revision.review.revisions
+            for c in rev.comments
+            if c.user != self.user
+        }
+        recipients.add('tvansteenburgh@gmail.com')
+        if not recipients:
+            return
+
+        settings = request.registry.settings
+        import sendgrid
+
+        client = sendgrid.SendGridClient(
+                os.environ.get("SENDGRID_APIKEY") or
+                settings.get('sendgrid.api_key'))
+        message = sendgrid.Mail()
+
+        for email in recipients:
+            message.add_to(email)
+        message.set_from(settings['sendgrid.from_email'])
+        message.set_subject(
+            'Comment on {} review'.format(self.revision.review.source_url))
+        message.set_html(self.html(request))
+
+        client.send(message)
 
 
 class DiffComment(Base):
