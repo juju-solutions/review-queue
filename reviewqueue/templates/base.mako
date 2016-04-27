@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="${request.static_url('reviewqueue:static/css/app.css')}">
   </head>
   <body>
-    <nav class="navbar navbar-default navbar-static-top">
+    <nav class="navbar navbar-default navbar-static-top navbar-inverse">
       <div class="container">
         <div class="navbar-header">
           <a class="navbar-brand" href="/">Review Queue</a>

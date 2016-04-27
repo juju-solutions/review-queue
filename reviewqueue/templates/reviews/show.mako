@@ -36,6 +36,11 @@
     </a>
   </li>
   % endfor
+	% if request.user and (request.user == review.user or request.user.is_charmer):
+  <li role="presentation">
+		<a href="${request.route_url('review_show_import', id=review.id)}" title="Update this review with a new revision">Import a new revision</a>
+	</li>
+	% endif
 </ul>
 
 <h2>Tests</h2>

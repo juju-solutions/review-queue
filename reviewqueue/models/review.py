@@ -1,5 +1,8 @@
 import datetime
+import re
 import subprocess
+
+from pyramid.security import Allow
 
 from sqlalchemy import (
     Boolean,
@@ -40,6 +43,19 @@ class Review(Versioned, Base):
         'Revision',
         backref='review', order_by='Revision._position',
         collection_class=ordering_list('_position'))
+
+    @property
+    def __acl__(self):
+        return [
+            (Allow, self.user.id, 'edit'),
+        ]
+
+    @property
+    def revisionless_url(self):
+        match = re.match(r'^(.*)-(\d+)$', self.source_url)
+        if not match:
+            return self.source_url
+        return match.group(1)
 
     @classmethod
     def get_active_reviews(cls):
@@ -85,6 +101,20 @@ class Review(Versioned, Base):
     def refresh_tests(self, settings):
         for r in self.revisions:
             r.refresh_tests(settings)
+
+    def get_new_revisions(self, settings):
+        """Return a list of new revisions for this Review
+
+        """
+        cs = h.charmstore(settings)
+        charmstore_entity = h.get_charmstore_entity(
+            cs, self.source_url, channel=self.channel)
+        remote_revisions = (
+            charmstore_entity['Meta']['revision-info']['Revisions'])
+        current_revision = self.latest_revision.revision_url
+        new_revisions = (
+            remote_revisions[0:remote_revisions.index(current_revision)])
+        return new_revisions
 
     def refresh_revisions(self, settings):
         """Check for and download new source revisions for this review.

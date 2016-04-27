@@ -27,6 +27,12 @@ def includeme(config):
     config.add_route(
         'review_update', '/reviews/{id}',
         factory=ReviewFactory, traverse='/{id}', request_method="POST")
+    config.add_route(
+        'review_show_import', '/reviews/{id}/import',
+        factory=ReviewFactory, traverse='/{id}', request_method="GET")
+    config.add_route(
+        'review_new_import', '/reviews/{id}/import',
+        factory=ReviewFactory, traverse='/{id}', request_method="POST")
 
 
 class ReviewFactory(object):
@@ -155,8 +161,8 @@ def validate(request):
             'latest_revision_url': None,
         }
     else:
-        latest_revision_url = (
-            charmstore_entity['Meta']['revision-info']['Revisions'][0])
+        all_revisions = charmstore_entity['Meta']['revision-info']['Revisions']
+        latest_revision_url = all_revisions[0]
         match = re.match(r'^(.*)-(\d+)$', latest_revision_url)
         latest_revision = match.group(2)
         if revision_number != latest_revision:
@@ -166,6 +172,13 @@ def validate(request):
                     'source_url': source_url,
                     'latest_revision_url': latest_revision_url,
                 }
+            else:
+                for rev in all_revisions[1:]:
+                    match = re.match(r'^(.*)-(\d+)$', rev)
+                    if match and revision_number == match.group(2):
+                        latest_revision_url = rev
+                        break
+
         return {
             'location': 'revision',
             'source_url': source_url,
@@ -267,3 +280,44 @@ def update(request):
     getattr(review, action)()
 
     return HTTPFound(location=request.route_url('reviews_index'))
+
+
+@view_config(
+    route_name='review_show_import',
+    renderer='reviews/show_import.mako',
+    permission='edit',
+)
+def show_import(request):
+    """Show form for importing new revisions.
+
+    GET /reviews/:id/import
+
+    """
+    review = request.context
+
+    return {
+        'review': review,
+        'new_revisions': review.get_new_revisions(request.registry.settings),
+    }
+
+
+@view_config(
+    route_name='review_new_import',
+    permission='edit',
+)
+def new_import(request):
+    """Import a new Revision into a Review
+
+    GET /reviews/:id/import
+
+    """
+    review = request.context
+    revision = request.params['revision']
+
+    review.revisions.insert(0, M.Revision(revision_url=revision))
+    review.status = M.Status.NEEDS_REVIEW
+    review.vote = 0
+    review.create_tests(request.registry.settings)
+
+    return HTTPFound(location=request.route_url(
+        'reviews_show', id=review.id))
