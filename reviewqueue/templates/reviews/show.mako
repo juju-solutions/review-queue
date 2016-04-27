@@ -138,7 +138,7 @@
 
 <hr>
 
-<h2>Reviewer's Checklist</h2>
+<h2>Policy Checklist</h2>
 <form id="policyForm">
 <table class="table">
   <thead>
@@ -147,29 +147,52 @@
       <th>Unreviewed</th>
       <th>Pass</th>
       <th>Fail</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
-    % for policy in policy_checklist:
-    <% policy_check = review.get_policy_check_for(policy.id) %>
-    <tr class="${'policyStatus{}'.format(policy_check.status) if policy_check else ''}">
-      <td>${policy.description}</td>
-      <td><input type="radio" name="policy${policy.id}" value="0"
-            data-revision-id="${revision.id}"
-            data-policy-id="${policy.id}"
-            ${"checked" if not policy_check or policy_check.unreviewed else ""}></td>
-      <td><input type="radio" name="policy${policy.id}" value="1"
-            data-revision-id="${revision.id}"
-            data-policy-id="${policy.id}"
-            ${"checked" if policy_check and policy_check.passing else ""}></td>
-      <td><input type="radio" name="policy${policy.id}" value="2"
-            data-revision-id="${revision.id}"
-            data-policy-id="${policy.id}"
-            ${"checked" if policy_check and policy_check.failing else ""}></td>
-      <td id="policy-${policy.id}-user">${policy_check.user.nickname if policy_check else ''}</td>
-      <td id="policy-${policy.id}-revision">${policy_check.revision.shortname if policy_check else ''}</td>
-      <td id="policy-${policy.id}-timestamp">${self.human_date(policy_check.updated_at or policy_check.created_at) if policy_check else ''}</td>
-    </tr>
+    % for cat in policy_categories:
+      <tr>
+        <td colspan="5"><h3>${cat.name}</h3></td>
+      </tr>
+      % for policy in cat.policies:
+      <% policy_check = review.get_policy_check_for(policy.id) %>
+      <tr class="${'policyStatus{}'.format(policy_check.status) if policy_check else ''}">
+        <td>
+          ${policy.description | n}
+          % if policy.tip:
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+          % endif
+        </td>
+        <td><input type="radio" name="policy${policy.id}" value="0"
+              data-revision-id="${revision.id}"
+              data-policy-id="${policy.id}"
+              ${"checked" if not policy_check or policy_check.unreviewed else ""}></td>
+        <td><input type="radio" name="policy${policy.id}" value="1"
+              data-revision-id="${revision.id}"
+              data-policy-id="${policy.id}"
+              ${"checked" if policy_check and policy_check.passing else ""}></td>
+        <td>
+          % if policy.required:
+            <input type="radio" name="policy${policy.id}" value="2"
+              data-revision-id="${revision.id}"
+              data-policy-id="${policy.id}"
+              ${"checked" if policy_check and policy_check.failing else ""}>
+          % endif
+        </td>
+        <td class="small" id="policy-${policy.id}-user">
+          <% title = '{}, {}'.format(policy_check.revision.shortname, h.arrow.get(policy_check.updated_at or policy_check.created_at).humanize()) if policy_check else '' %>
+          <span title="${title}">
+            ${policy_check.user.nickname if policy_check else ''}
+          </span>
+        </td>
+      </tr>
+      % if policy.tip:
+      <tr style="display: none">
+        <td colspan="5" class="bg-warning">${policy.tip | n}</td>
+      </tr>
+      % endif
+      % endfor
     % endfor
   </tbody>
 </table>

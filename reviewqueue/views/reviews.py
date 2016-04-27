@@ -246,7 +246,7 @@ def show(request):
         'revision': revision,
         'diff_revision': diff_revision,
         'substrates': substrates,
-        'policy_checklist': M.DBSession.query(M.Policy),
+        'policy_categories': M.DBSession.query(M.PolicyCategory),
     }
 
 

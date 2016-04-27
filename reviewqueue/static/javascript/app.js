@@ -19,9 +19,8 @@ $(function() {
     }).done(function(data) {
       if(data.error) {
       } else {
-        $('#policy-' + policy_id + '-user').html(data.user);
-        $('#policy-' + policy_id + '-revision').html(data.revision);
-        $('#policy-' + policy_id + '-timestamp').html(data.timestamp);
+        html = '<span title="' + data.revision + ', ' + data.timestamp + '">' + data.user + '</span>';
+        $('#policy-' + policy_id + '-user').html(html);
       }
     });
   });
@@ -96,6 +95,10 @@ $(function() {
   });
 
   $('.test-detail-toggle').on('click', function(event) {
+    $(this).closest('tr').next().toggle();
+  });
+
+  $('.glyphicon-info-sign').on('click', function(event) {
     $(this).closest('tr').next().toggle();
   });
 });

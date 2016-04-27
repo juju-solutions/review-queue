@@ -479,8 +479,18 @@ class DiffComment(Base):
     user = relationship('User')
 
 
+class PolicyCategory(Base):
+    name = Column(Text)
+
+    policies = relationship('Policy', backref='category')
+
+
 class Policy(Base):
+    category_id = Column(Integer, ForeignKey('policycategory.id'))
+
     description = Column(Text)
+    tip = Column(Text)
+    required = Column(Boolean)
 
 
 class ReviewPolicyCheck(Base):

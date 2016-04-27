@@ -1,0 +1,147 @@
+categories:
+  -
+    name: General
+    policies:
+      -
+        description: Must verify that any software installed or utilized is verified as coming from the intended source.
+        tip: |
+          <ul>
+          <li>Any software installed from the Ubuntu or CentOS default archives satisfies this due to the apt and yum sources including cryptographic signing information.</li>
+          <li>Third party repositories must be listed as a configuration option that can be overridden by the user and not hard coded in the charm itself.</li>
+          <li>Launchpad PPAs are acceptable as the add-apt-repository command retrieves the keys securely.</li>
+          <li>Other third party repositories are acceptable if the signing key is embedded in the charm.</li>
+          </ul>
+        required: true
+      -
+        description: Must provide a means to protect users from known security vulnerabilities in a way consistent with best practices as defined by either operating system policies or upstream documentation.
+        tip: Basically, this means there must be instructions on how to apply updates if you use software not from distribution channels.
+        required: true
+      -
+        description: Must have hooks that are <a href="http://en.wikipedia.org/wiki/Idempotence">idempotent</a>.
+        tip:
+        required: true
+      -
+        description: Should be built using <a href="https://www.jujucharms.com/docs/devel/authors-charm-building">charm layers</a>.
+        tip:
+        required: false
+      -
+        description: Should use Juju Resources to deliver required payloads.
+        tip:
+        required: false
+  -
+    name: Testing and Quality
+    policies:
+      -
+        description: <code>charm proof</code> must pass without errors or warnings.
+        tip:
+        required: true
+      -
+        description: Must include passing unit, functional, or integration tests.
+        tip:
+        required: true
+      -
+        description: Tests must exercise all relations.
+        tip:
+        required: true
+      -
+        description: Tests must exercise config.
+        tip: <code>set-config</code>, <code>unset-config</code>, and <code>re-set</code> must be tested as a minimum
+        required: true
+      -
+        description: Must not use anything infrastructure-provider specific (i.e. querying EC2 metadata service).
+        tip: Must be self contained unless the charm is a proxy for an existing cloud service, e.g. ec2-elb charm.
+        required: true
+      -
+        description: Must not use symlinks.
+        tip:
+        required: true
+      -
+        description: Bundles must only use promulgated charms, they cannot reference charms in personal namespaces.
+        tip:
+        required: true
+      -
+        description: Must call Juju hook tools (relation-*, unit-*, config-*, etc) without a hard coded path.
+        tip:
+        required: true
+      -
+        description: Should include a <code>tests.yaml</code> for all integration tests.
+        tip:
+        required: false
+  -
+    name: Metadata
+    policies:
+      -
+        description: Must include a full description of what the software does.
+        tip:
+        required: true
+      -
+        description: Must include a maintainer email address for a team or individual who will be responsive to contact.
+        tip:
+        required: true
+      -
+        description: Must include a license. Call the file 'copyright' and make sure all files' licenses are specified clearly.
+        tip:
+        required: true
+      -
+        description: Must be under a <a href="http://opensource.org/osd">Free license</a>.
+        tip:
+        required: true
+      -
+        description: Must have a well documented and valid <code>README.md</code>.
+        tip:
+        required: true
+      -
+        description: Must describe the service.
+        tip:
+        required: true
+      -
+        description: Must describe how it interacts with other services, if applicable.
+        tip:
+        required: true
+      -
+        description: Must document the interfaces.
+        tip:
+        required: true
+      -
+        description: Must show how to deploy the charm.
+        tip:
+        required: true
+      -
+        description: Must define external dependencies, if applicable.
+        tip:
+        required: true
+      -
+        description: Should link to a recommend production usage bundle and recommended configuration if this differs from the default.
+        tip:
+        required: false
+      -
+        description: Should reference and link to upstream documentation and best practices.
+        tip:
+        required: false
+  -
+    name: Security
+    policies:
+      -
+        description: Must not run any network services using default passwords.
+        tip:
+        required: true
+      -
+        description: Must verify and validate any external payload
+        tip: |
+          <ul>
+          <li>Known and understood packaging systems that verify packages like apt, pip, and yum are ok.</li>
+          <li><code>wget | sh</code> style is not ok.</li>
+          </ul>
+        required: true
+      -
+        description: Should make use of whatever Mandatory Access Control system is provided by the distribution.
+        tip: |
+          <ul>
+          <li><a href="https://help.ubuntu.com/lts/serverguide/apparmor.html">AppArmor</a> for Ubuntu.</li>
+          <li><a href="https://wiki.centos.org/HowTos/SELinux">SELinux</a> for CentOS systems.</li>
+          </ul>
+        required: false
+      -
+        description: Should avoid running services as root.
+        tip:
+        required: false
