@@ -316,6 +316,14 @@ class Comment(Base):
             dict(comment=self, request=request))
 
     def email(self, request):
+        settings = request.registry.settings
+        api_key = (
+            os.environ.get("SENDGRID_APIKEY") or
+            settings.get('sendgrid.api_key'))
+
+        if not api_key:
+            return
+
         recipients = {
             c.user.email
             for rev in self.revision.review.revisions
@@ -326,7 +334,6 @@ class Comment(Base):
         if not recipients:
             return
 
-        settings = request.registry.settings
         import sendgrid
 
         client = sendgrid.SendGridClient(
@@ -336,7 +343,9 @@ class Comment(Base):
 
         for email in recipients:
             message.add_to(email)
-        message.set_from(settings['sendgrid.from_email'])
+        message.set_from(
+            settings.get('sendgrid.from_email') or
+            'no-reply@review.juju.solutions')
         message.set_subject(
             'Comment on {} review'.format(self.revision.review.source_url))
         message.set_html(self.html(request))
