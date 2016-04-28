@@ -23,12 +23,10 @@ test: .venv
 	#sudo apt-get install -qy libmacaroons0 python-macaroons libsodium13
 	# create virtualenv, install app deps
 	sudo apt-get install -qy python-virtualenv libpq-dev python-dev
-	virtualenv .venv #--system-site-packages
+	virtualenv .venv --no-pip
 
-	# why 20.4? -> https://github.com/pypa/setuptools/issues/523
-	$(PYHOME)/pip install -U setuptools==20.4
-
-	$(PYHOME)/pip install -U pip setuptools tox
+	$(PYHOME)/easy_install pip
+	$(PYHOME)/pip install tox
 	$(PYHOME)/pip install -e .
 
 serve: .venv
