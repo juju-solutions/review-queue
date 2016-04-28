@@ -357,7 +357,7 @@ def render_diff_comment(lineno, comments):
             user=c.user.nickname,
             timestamp=c.created_at,
             human_timestamp=arrow.get(c.created_at).humanize(),
-            comment=c.text)
+            comment=c.text.replace('\n', '<br>'))
         lines.append(panel)
     lines.append('</td></tr>')
     return ''.join(lines)
