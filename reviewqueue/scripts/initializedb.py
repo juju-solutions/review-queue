@@ -48,8 +48,8 @@ def main():
         create_database(engine.url)
     M.Base.metadata.create_all(engine)
 
-    if args.force:
-        # Insert some stuff
+    # Create policy checklist data
+    if M.DBSession.query(M.Policy).count() == 0:
         with transaction.manager:
             here = os.path.dirname(__file__)
             db_file = os.path.join(here, 'db.yaml')
