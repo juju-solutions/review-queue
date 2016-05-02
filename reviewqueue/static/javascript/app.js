@@ -76,6 +76,7 @@ $(function() {
         </form>
       </td></tr>`;
     tr.after(newRow);
+    tr.next().find('textarea').focus();
   });
 
   $('table.highlighttable').on('submit', '#diffCommentForm', function(event) {
