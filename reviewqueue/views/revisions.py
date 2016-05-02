@@ -73,7 +73,9 @@ def revision_test(request):
         request.registry.settings, substrates=substrate)
 
     return HTTPFound(location=request.route_url(
-        'reviews_show', id=revision.review.id))
+        'reviews_show', id=revision.review.id,
+        _query=dict(revision=revision.id))
+    )
 
 
 @view_config(
@@ -107,7 +109,9 @@ def revision_comment(request):
     comment.email(request)
 
     return HTTPFound(location=request.route_url(
-        'reviews_show', id=revision.review.id))
+        'reviews_show', id=revision.review.id,
+        _query=dict(revision=revision.id))
+    )
 
 
 @view_config(
