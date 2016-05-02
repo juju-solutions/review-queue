@@ -174,17 +174,20 @@
         <td><input type="radio" name="policy${policy.id}" value="0"
               data-revision-id="${revision.id}"
               data-policy-id="${policy.id}"
-              ${"checked" if not policy_check or policy_check.unreviewed else ""}></td>
+              ${"checked" if not policy_check or policy_check.unreviewed else ""}
+              ${'disabled' if not request.user else ''}></td>
         <td><input type="radio" name="policy${policy.id}" value="1"
               data-revision-id="${revision.id}"
               data-policy-id="${policy.id}"
-              ${"checked" if policy_check and policy_check.passing else ""}></td>
+              ${"checked" if policy_check and policy_check.passing else ""}
+              ${'disabled' if not request.user else ''}></td>
         <td>
           % if policy.required:
             <input type="radio" name="policy${policy.id}" value="2"
               data-revision-id="${revision.id}"
               data-policy-id="${policy.id}"
-              ${"checked" if policy_check and policy_check.failing else ""}>
+              ${"checked" if policy_check and policy_check.failing else ""}
+              ${'disabled' if not request.user else ''}></td>
           % endif
         </td>
         <td class="small" id="policy-${policy.id}-user">
@@ -235,3 +238,4 @@
 % endfor
 
 <div id="revision-id" style="display:none">${revision.id}</div>
+<div id="user-id" style="display:none">${request.user.id if request.user else ''}</div>

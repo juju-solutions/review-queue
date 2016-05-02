@@ -25,8 +25,17 @@ $(function() {
     });
   });
 
+  /*
+   * Showe "add diff comment" button when hovering over a diff row
+   */
   $('table.highlighttable tr').on('mouseenter', function() {
     var self = $(this);
+
+    // abort if not logged in
+    if ($('#user-id').text().length === 0) {
+      return;
+    }
+
     // abort if we're already showing a comment box for this row
     if (self.next().find('#diffCommentForm').length) {
       return;
