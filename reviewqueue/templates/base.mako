@@ -26,7 +26,7 @@
           <a href="${request.route_url('users_show', nickname=request.user.nickname)}" class="navbar-link">${request.user.fullname}</a> |
           <a href="${request.route_url('logout')}">Logout</a>
         %else:
-          <a href="/login/openid?openid_identifier=http://login.ubuntu.com">Login</a>
+          <a href="/login">Login</a>
         %endif
         </div>
       </div>

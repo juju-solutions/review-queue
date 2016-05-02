@@ -16,6 +16,7 @@ def includeme(config):
     config.add_openid_login()
 
     config.add_route('logout', '/logout')
+    config.add_route('login', '/login')
 
 
 @view_config(context='velruse.AuthenticationComplete')
@@ -48,14 +49,24 @@ def login_callback(request):
         db.flush()
 
     headers = remember(request, user.id)
-    return HTTPFound(
-        location=request.route_url('home'),
-        headers=headers)
+    destination = request.session.get('redirect_to')
+    if destination:
+        del request.session['redirect_to']
+    else:
+        destination = request.route_url('home')
+
+    return HTTPFound(location=destination, headers=headers)
 
 
 @view_config(route_name='logout')
 def logout(request):
     headers = forget(request)
+    return HTTPFound(location=request.route_url('home'), headers=headers)
+
+
+@view_config(route_name='login')
+def login(request):
+    request.session['redirect_to'] = request.referer
+
     return HTTPFound(
-        location=request.route_url('home'),
-        headers=headers)
+        location='/login/openid?openid_identifier=http://login.ubuntu.com')
