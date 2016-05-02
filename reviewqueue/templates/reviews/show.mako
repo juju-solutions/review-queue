@@ -13,7 +13,9 @@
 </div>
 % endif
 
-<h1>${review.source_url}</h1>
+<h1>
+  <img src="${review.icon_url(request.registry.settings)}" class="charm-icon" />
+  ${review.source_url}</h1>
 <p>
   <strong>Status:</strong> ${review.human_status}<br>
   <strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)

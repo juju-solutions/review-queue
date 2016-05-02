@@ -69,3 +69,7 @@ td.diff-comment {
 .glyphicon-info-sign {
   cursor: pointer;
 }
+.charm-icon {
+  height: 40px;
+  width: 40px;
+}

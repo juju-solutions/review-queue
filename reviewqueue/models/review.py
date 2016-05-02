@@ -66,6 +66,10 @@ class Review(Versioned, Base):
             ]))
         )
 
+    def icon_url(self, settings):
+        cs = h.charmstore(settings)
+        return cs.charm_icon_url(self.source_url, channel=self.channel)
+
     def get_policy_check_for(self, policy_id):
         from .other import ReviewPolicyCheck
         return (
