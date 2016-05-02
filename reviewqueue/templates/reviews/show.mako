@@ -162,8 +162,7 @@
       <tr>
         <td colspan="5"><h3>${cat.name}</h3></td>
       </tr>
-      % for policy in cat.policies:
-      <% policy_check = review.get_policy_check_for(policy.id) %>
+      % for policy, policy_check in cat.get_review_policies(review):
       <tr class="${'policyStatus{}'.format(policy_check.status) if policy_check else ''}">
         <td>
           ${policy.description | n}

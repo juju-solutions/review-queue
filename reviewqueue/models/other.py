@@ -16,6 +16,7 @@ from sqlalchemy import (
     Integer,
     Text,
     func,
+    and_
     )
 
 from sqlalchemy.orm import (
@@ -368,6 +369,18 @@ class PolicyCategory(Base):
     name = Column(Text)
 
     policies = relationship('Policy', backref='category')
+
+    def get_review_policies(self, review):
+        return (
+            DBSession.query(Policy, ReviewPolicyCheck)
+            .outerjoin(
+                ReviewPolicyCheck,
+                and_(
+                    ReviewPolicyCheck.policy_id == Policy.id,
+                    ReviewPolicyCheck.review_id == review.id))
+            .filter(Policy.category_id == self.id)
+            .order_by(Policy.id)
+        )
 
 
 class Policy(Base):
