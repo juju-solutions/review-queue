@@ -53,6 +53,22 @@ class RevisionTest(Base):
     user = relationship('User')
 
     def send_ci_request(self, settings):
+        if not (settings.get('base_url') or '').strip():
+            # Don't try to submit a test unless we have a jenkins_url
+            log.warn(
+                'Skipping test submission, no value for '
+                'testing.jenkins_url in .ini file.')
+            return
+
+        if not (settings.get('testing.jenkins_url') or '').strip():
+            # Don't submit a test unless we have a base_url since
+            # we'd never get the result of the test back anyway
+            # (which would lead to a never-ending cycle of retries).
+            log.warn(
+                'Skipping test submission, no value for '
+                'base_url in .ini file.')
+            return
+
         test_url = self.revision.get_test_url()
         if not test_url:
             return
