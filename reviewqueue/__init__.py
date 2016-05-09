@@ -29,6 +29,11 @@ def groupfinder(userid, request):
     return None
 
 
+def validate_settings(settings):
+    settings['base_url'] = (settings.get('base_url') or '').rstrip('/')
+    return settings
+
+
 class CustomRequest(Request):
     @reify
     def user(self):
@@ -50,6 +55,8 @@ class RootFactory(object):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
+    settings = validate_settings(settings)
+
     engine = engine_from_config(settings, 'sqlalchemy.')
     M.DBSession.configure(bind=engine)
     M.Base.metadata.bind = engine
