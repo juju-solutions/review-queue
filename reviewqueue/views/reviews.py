@@ -39,7 +39,6 @@ class ReviewFactory(object):
     __acl__ = [
         (Allow, Everyone, 'view'),
         (Allow, Authenticated, 'create'),
-        (Allow, 'charmers', 'update'),
     ]
 
     def __init__(self, request):
@@ -132,8 +131,9 @@ def validate(request):
         }
 
     charm_owner = charmstore_entity['Meta']['owner']['User']
-    if (charm_owner not in request.user.get_groups(request.registry.settings)
-            and not request.user.is_charmer):
+    if (charm_owner not in
+            request.user.get_groups(request.registry.settings) and
+            not request.user.is_charmer):
         return {
             'error': 'NotOwner',
             'owner': charm_owner,
@@ -265,7 +265,7 @@ def show(request):
 
 @view_config(
     route_name='review_update',
-    permission='update',
+    permission='edit',
 )
 def update(request):
     """Update a Review

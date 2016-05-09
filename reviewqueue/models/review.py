@@ -48,6 +48,7 @@ class Review(Versioned, Base):
     def __acl__(self):
         return [
             (Allow, self.user.id, 'edit'),
+            (Allow, 'charmers', 'edit'),
         ]
 
     @property
