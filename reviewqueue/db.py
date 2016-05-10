@@ -10,8 +10,8 @@ class DB(object):
         self.session.flush()
 
     def create_review(
-            self, user, source_url, description, charmstore_entity,
-            channel, latest_revision_url, settings):
+            self, user, source_url, description, is_cpp, is_oil,
+            charmstore_entity, channel, latest_revision_url, settings):
 
         promulgated = charmstore_entity['Meta']['promulgated']['Promulgated']
         revision_urls = charmstore_entity['Meta']['revision-info']['Revisions']
@@ -19,6 +19,8 @@ class DB(object):
         review = M.Review(
             source_url=source_url,
             description=description,
+            is_cpp=is_cpp,
+            is_oil=is_oil,
             status=M.Status.NEEDS_REVIEW,
             promulgated=promulgated,
             charm_name=(

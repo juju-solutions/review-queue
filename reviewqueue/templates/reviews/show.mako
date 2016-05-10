@@ -18,7 +18,9 @@
   ${review.source_url}</h1>
 <p>
   <strong>Status:</strong> ${review.human_status}<br>
-  <strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)
+  <strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)<br>
+  <strong>CPP?:</strong> ${'Yes' if review.is_cpp else 'No'}<br>
+  <strong>OIL?:</strong> ${'Yes' if review.is_oil else 'No'}<br>
 </p>
 % if review.description:
 <p>${review.description}</p>

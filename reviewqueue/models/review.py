@@ -37,6 +37,8 @@ class Review(Versioned, Base):
     channel = Column(Text)
     status = Column(Enum(*Status._fields, name='Status'))
     promulgated = Column(Boolean)
+    is_cpp = Column(Boolean)
+    is_oil = Column(Boolean)
 
     user = relationship('User')
     revisions = relationship(

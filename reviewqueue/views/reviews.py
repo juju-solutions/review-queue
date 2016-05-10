@@ -217,6 +217,8 @@ def create(request):
         request.user,
         source_url,
         description,
+        request.params.get('cpp', False),
+        request.params.get('oil', False),
         result['charmstore_entity'],
         result['channel'],
         result['latest_revision_url'],

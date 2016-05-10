@@ -57,5 +57,17 @@ a promulgated charm) will be used.<p>
       rows="5" placeholder="">${request.params.get('description') or ''}
     </textarea>
   </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="cpp"
+        ${'checked' if request.params.get('cpp') else ''}> CPP member?
+    </label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="oil"
+        ${'checked' if request.params.get('oil') else ''}> OIL member?
+    </label>
+  </div>
   <button type="submit" class="btn btn-default">Submit</button>
 </form>
