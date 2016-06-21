@@ -347,7 +347,7 @@ class Comment(Base):
             for c in rev.comments
             if c.user != self.user
         }
-        recipients.add('tvansteenburgh@gmail.com')
+        recipients.add(self.revision.review.user.email)
         if not recipients:
             return
 
