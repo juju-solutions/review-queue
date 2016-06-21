@@ -24,7 +24,7 @@ requires = [
     'pyramid_tm',
     'pyyaml',
     'requests==2.6.0',
-    'sendgrid',
+    'sendgrid<3.0.0',
     'simplejson',
     'sqlalchemy',
     'sqlalchemy-utils',
