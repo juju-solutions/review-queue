@@ -95,7 +95,7 @@ class RevisionTest(Base):
 
         r = requests.get(req_url, params=req_params)
 
-        if r.status_code == requests.codes.ok:
+        if r.status_code in (200, 201):
             self.status = 'PENDING'
 
     def try_finish(self):
