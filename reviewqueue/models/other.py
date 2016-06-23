@@ -98,6 +98,8 @@ class RevisionTest(Base):
         if r.status_code in (200, 201):
             self.status = 'PENDING'
 
+        self.updated_at = datetime.datetime.utcnow()
+
     def try_finish(self):
         """Attempt to find a CI result for this ReviewTest
         and update the ReviewTest accordingly. Download and store
