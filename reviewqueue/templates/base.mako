@@ -39,9 +39,9 @@
     <footer class="footer">
       <div class="container">
         <p class="text-muted">
-          <a href="//github.com/tvansteenburgh/review-queue">github repo</a> |
-          <a href="//github.com/tvansteenburgh/review-queue/issues">report a bug</a> |
-          <a href="//github.com/tvansteenburgh/review-queue/issues">request a feature</a>
+          <a href="//github.com/juju-solutions/review-queue">github repo</a> |
+          <a href="//github.com/juju-solutions/review-queue/issues">report a bug</a> |
+          <a href="//github.com/juju-solutions/review-queue/issues">request a feature</a>
         </p>
       </div>
     </footer>
