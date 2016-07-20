@@ -23,11 +23,11 @@ test: .venv
 	#sudo apt-get install -qy libmacaroons0 python-macaroons libsodium13
 	# create virtualenv, install app deps
 	sudo apt-get install -qy python-virtualenv libpq-dev python-dev
-	virtualenv .venv --no-pip
+	virtualenv .venv
 
-	$(PYHOME)/easy_install pip
-	$(PYHOME)/pip install tox
-	$(PYHOME)/pip install -e .
+	$(PYHOME)/pip install --no-index -f deps/ pip==8.1.2
+	$(PYHOME)/pip install --no-index -f deps/ -r requirements.txt
+	$(PYHOME)/pip install --no-index -f deps/ .
 
 serve: .venv
 	$(PYHOME)/initialize_db development.ini
