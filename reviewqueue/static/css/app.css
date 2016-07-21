@@ -73,3 +73,24 @@ td.diff-comment {
   height: 40px;
   width: 40px;
 }
+.navbar-inverse {
+  border: 0;
+}
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-nav>li>a,
+.navbar-inverse .navbar-text,
+.navbar-inverse .navbar-link {
+  color: #fff;
+}
+.navbar-inverse a {
+  color: #1ab6ef;
+}
+.navbar-inverse .navbar-nav li {
+  border-left: 1px solid #555;
+}
+.navbar-inverse .navbar-nav li:hover {
+  background-color: #dd4814;
+}
+.navbar-inverse .navbar-nav li:last-child {
+  border-right: 1px solid #555;
+}
