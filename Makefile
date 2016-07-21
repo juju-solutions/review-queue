@@ -27,7 +27,7 @@ test: .venv
 
 	$(PYHOME)/pip install --no-index -f deps/ pip==8.1.2
 	$(PYHOME)/pip install --no-index -f deps/ -r requirements.txt
-	$(PYHOME)/pip install --no-index -f deps/ .
+	$(PYHOME)/pip install --no-index -f deps/ -e .
 
 serve: .venv
 	$(PYHOME)/initialize_db development.ini
