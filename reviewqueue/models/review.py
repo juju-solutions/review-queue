@@ -144,11 +144,17 @@ class Review(Versioned, Base):
             self.vote = 0
             self.create_tests(settings)
 
+    def reopen(self):
+        """Reopen this Review
+
+        """
+        self.status = Status.NEEDS_REVIEW
+
     def close(self):
         """Close this Review
 
         """
-        self.status = 'CLOSED'
+        self.status = Status.CLOSED
 
     def promulgate(self):
         """Close this Review and promulgate the charm
@@ -162,4 +168,4 @@ class Review(Versioned, Base):
             cmd = ['jaas', 'promulgate', self.source_url]
 
         if subprocess.call(cmd) == 0:
-            self.status = 'PROMULGATED'
+            self.status = Status.PROMULGATED

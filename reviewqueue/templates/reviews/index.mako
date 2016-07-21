@@ -1,5 +1,10 @@
 <%inherit file="../base.mako"/>
 
+<div class="pull-right btn-launch btn-group">
+  %if request.user:
+    <a class="btn btn-primary" href="${request.route_url('reviews_new')}">Request a Review</a>
+  %endif
+</div>
 <h1>Reviews</h1>
 <table class="table">
   <thead>
