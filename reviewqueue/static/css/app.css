@@ -94,3 +94,42 @@ td.diff-comment {
 .navbar-inverse .navbar-nav li:last-child {
   border-right: 1px solid #555;
 }
+.btn-primary {
+  color: #fff;
+  background-color: #dd4814;
+  border-color: #dd4814;
+}
+.open>.dropdown-toggle.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  color: #fff;
+  background-color: #c03f11;
+  border-color: #c03f11;
+}
+.btn-positive {
+  color: #fff;
+  background-color: #3fb24f;
+  border-color: #3fb24f;
+}
+.open>.dropdown-toggle.btn-positive,
+.btn-positive:hover,
+.btn-positive:focus,
+.btn-positive:active {
+  color: #fff;
+  background-color: #30a340;
+  border-color: #30a340;
+}
+.btn-negative {
+  color: #fff;
+  background-color: #fc4949;
+  border-color: #fc4949;
+}
+.open>.dropdown-toggle.btn-negative,
+.btn-negative:hover,
+.btn-negative:focus,
+.btn-negative:active {
+  color: #fff;
+  background-color: #ed3a3a;
+  border-color: #ed3a3a;
+}

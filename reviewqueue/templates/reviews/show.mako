@@ -3,11 +3,16 @@
 % if request.user and request.user.is_charmer:
 <div class="pull-right">
   <form action="${request.route_url('review_update', id=review.id)}" method="post">
-    <button type="submit" name="action" class="btn btn-default"
-      value="close" title="Close this review without promulgation">Close</button>
-    % if review.status == 'APPROVED':
-    <button type="submit" name="action" class="btn btn-default"
-      value="promulgate" title="Close this review and automatically promulgate the charm">Promulgate</button>
+    % if review.status != 'CLOSED':
+      % if review.status == 'APPROVED':
+      <button type="submit" name="action" class="btn btn-positive"
+        value="promulgate" title="Close this review and automatically promulgate the charm">Promulgate</button>
+      % endif
+      <button type="submit" name="action" class="btn btn-negative"
+        value="close" title="Close this review without promulgation">Close</button>
+    % else:
+      <button type="submit" name="action" class="btn btn-primary"
+        value="reopen" title="Reopen this review">Reopen</button>
     % endif
   </form>
 </div>
