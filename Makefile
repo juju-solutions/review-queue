@@ -22,7 +22,7 @@ test: .venv
 	#sudo apt-get update -qy
 	#sudo apt-get install -qy libmacaroons0 python-macaroons libsodium13
 	# create virtualenv, install app deps
-	sudo apt-get install -qy python-virtualenv libpq-dev python-dev
+	sudo apt-get install -qy virtualenv libpq-dev python-dev
 	virtualenv --never-download .venv
 
 	$(PYHOME)/pip install --no-index -f deps/ -r requirements.txt
