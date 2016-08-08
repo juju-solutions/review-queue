@@ -86,6 +86,8 @@ def main(global_config, **settings):
     config.include('reviewqueue.views.users')
     config.include('reviewqueue.views.revisions')
     config.include('reviewqueue.views.revision_tests')
+    if settings.get('mail.host'):
+        config.include('pyramid_mailer')
 
     config.scan()
     return config.make_wsgi_app()

@@ -32,5 +32,8 @@ serve: .venv
 	$(PYHOME)/initialize_db development.ini
 	$(PYHOME)/pserve --reload development.ini
 
+smtp:
+	# Runs a local smtp server for testing email features
+	python -m smtpd -n -c DebuggingServer localhost:2525
 
 .PHONY: clean
