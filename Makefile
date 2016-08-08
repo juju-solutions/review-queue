@@ -11,6 +11,11 @@ clean:
 	find . -name '*.pyc' -delete
 	find . -name '__pycache__' -delete
 	rm -rf .venv
+	rm -rf deps
+
+deps:
+	# Download deps to local cache
+	pip wheel -r requirements.txt -w deps/
 
 test: .venv
 	@echo Starting tests...
