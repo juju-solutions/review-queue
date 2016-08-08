@@ -51,7 +51,7 @@ def smtp_email(msg, request):
 def human_vote(vote):
     """Return integer ``vote`` as a +/- string"""
     if vote < 0:
-        return '-{}'.format(vote)
+        return '{}'.format(vote)
     else:
         return '+{}'.format(vote)
 
