@@ -19,6 +19,13 @@ def includeme(config):
     config.add_route('login', '/login')
 
 
+@view_config(
+    context='velruse.AuthenticationDenied',
+    renderer='authentication_denied.mako')
+def authentication_denied(request):
+    return {}
+
+
 @view_config(context='velruse.AuthenticationComplete')
 def login_callback(request):
     """Ubuntu SSO calls back here after login attempt.
