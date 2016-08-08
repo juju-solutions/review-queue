@@ -18,6 +18,36 @@ from theblues.charmstore import CharmStore
 log = logging.getLogger(__name__)
 
 
+def sendgrid_email(msg, sendgrid_api_key):
+    import sendgrid
+
+    client = sendgrid.SendGridClient(sendgrid_api_key)
+    message = sendgrid.Mail()
+
+    for email in msg['to']:
+        message.add_to(email)
+    message.set_from(msg['from'])
+    message.set_subject(msg['subject'])
+    message.set_html(msg['html'])
+
+    client.send(message)
+
+
+def smtp_email(msg, request):
+    from pyramid_mailer import get_mailer
+    from pyramid_mailer.message import Message
+
+    mailer = get_mailer(request)
+
+    message = Message(
+        subject=msg['subject'],
+        sender=msg['from'],
+        recipients=msg['to'],
+        html=msg['html'])
+
+    mailer.send(message)
+
+
 def human_vote(vote):
     """Return integer ``vote`` as a +/- string"""
     if vote < 0:

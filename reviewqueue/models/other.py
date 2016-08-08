@@ -336,12 +336,9 @@ class Comment(Base):
 
     def email(self, request):
         settings = request.registry.settings
-        api_key = (
+        sendgrid_api_key = (
             os.environ.get("SENDGRID_APIKEY") or
             settings.get('sendgrid.api_key'))
-
-        if not api_key:
-            return
 
         recipients = {
             c.user.email
@@ -353,23 +350,19 @@ class Comment(Base):
         if not recipients:
             return
 
-        import sendgrid
-
-        client = sendgrid.SendGridClient(
-                os.environ.get("SENDGRID_APIKEY") or
-                settings.get('sendgrid.api_key'))
-        message = sendgrid.Mail()
-
-        for email in recipients:
-            message.add_to(email)
-        message.set_from(
-            settings.get('sendgrid.from_email') or
-            'no-reply@review.juju.solutions')
-        message.set_subject(
-            'Comment on {} review'.format(self.revision.review.source_url))
-        message.set_html(self.html(request))
-
-        client.send(message)
+        msg = {
+            'to': recipients,
+            'from': settings.get('mail.default_sender'),
+            'subject': 'Comment on {} review'.format(
+                self.revision.review.source_url),
+            'html': self.html(request),
+        }
+        if sendgrid_api_key:
+            return h.sendgrid_email(msg, sendgrid_api_key)
+        elif settings.get('mail.host'):
+            return h.smtp_email(msg, request)
+        else:
+            log.warn('Email not configured, skipping email notifications.')
 
 
 class DiffComment(Base):
