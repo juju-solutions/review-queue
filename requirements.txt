@@ -42,7 +42,7 @@ pytz==2016.4
 PyYAML==3.11
 redis==2.10.5
 repoze.lru==0.6
-repoze.sendmail==4.2
+repoze.sendmail==4.1
 requests==2.6.0
 requests-oauthlib==0.6.1
 sendgrid==2.2.1
