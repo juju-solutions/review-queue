@@ -18,6 +18,7 @@ celery = Celery('reviewqueue.celery',
 
 # Optional configuration, see the application user guide.
 celery.conf.update(
+    CELERY_IGNORE_RESULT=True,
     CELERY_BACKEND_TRANSPORT_OPTIONS=config.get(
         'celery', 'backend_transport_options'),
     CELERY_ACCEPT_CONTENT=['pickle'],
