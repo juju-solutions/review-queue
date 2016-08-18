@@ -17,13 +17,29 @@ def includeme(config):
 
     config.add_route('logout', '/logout')
     config.add_route('login', '/login')
+    config.add_route('missing_email', '/missing_email')
 
 
 @view_config(
     context='velruse.AuthenticationDenied',
     renderer='authentication_denied.mako')
 def authentication_denied(request):
-    return {}
+    return {
+        'reason': request.context.reason,
+    }
+
+
+@view_config(
+    route_name='missing_email',
+    renderer='authentication_denied.mako')
+def missing_email(request):
+    """Render an error message if user attempts to login without sharing their
+    email address.
+
+    """
+    return {
+        'reason': 'Missing Email'
+    }
 
 
 @view_config(context='velruse.AuthenticationComplete')
@@ -43,6 +59,12 @@ def login_callback(request):
         fullname=request.params.get('openid.sreg.fullname'),
         email=request.params.get('openid.sreg.email'),
     )
+    if not user_data['email']:
+        return HTTPFound(location=request.route_url('missing_email'))
+    if not user_data['nickname']:
+        user_data['nickname'] = user_data['email'].split('@')[0]
+    if not user_data['fullname']:
+        user_data['fullname'] = user_data['nickname']
 
     db = DB()
     user = M.User.get(openid_claimed_id=user_data['openid_claimed_id'])
@@ -73,7 +95,8 @@ def logout(request):
 
 @view_config(route_name='login')
 def login(request):
-    request.session['redirect_to'] = request.referer
+    if not request.session.get('redirect_to'):
+        request.session['redirect_to'] = request.referer
 
     return HTTPFound(
         location='/login/openid?openid_identifier=http://login.ubuntu.com')
