@@ -11,6 +11,8 @@ app_ini = '%s.ini' % os.environ.get('ENV', 'development')
 config = ConfigParser.RawConfigParser()
 config.read(app_ini)
 
+admins = [(i, i) for i in eval(config.get('handler_exc', 'args'))[2]]
+
 celery = Celery('reviewqueue.celery',
                 broker=config.get('celery', 'broker'),
                 backend=config.get('celery', 'backend'),
@@ -30,7 +32,7 @@ celery.conf.update(
         },
     },
     CELERY_SEND_TASK_ERROR_EMAILS=True,
-    ADMINS=eval(config.get('handler_exc', 'args'))[2],
+    ADMINS=admins,
     SERVER_EMAIL=config.get('app:main', 'mail.default_sender'),
     EMAIL_HOST=config.get('app:main', 'mail.host'),
     EMAIL_PORT=config.get('app:main', 'mail.port'),
