@@ -29,6 +29,11 @@ celery.conf.update(
             'schedule': timedelta(seconds=60),
         },
     },
+    CELERY_SEND_TASK_ERROR_EMAILS=True,
+    ADMINS=eval(config.get('handler_exc', 'args'))[2],
+    SERVER_EMAIL=config.get('app:main', 'mail.default_sender'),
+    EMAIL_HOST=config.get('app:main', 'mail.host'),
+    EMAIL_PORT=config.get('app:main', 'mail.port'),
 )
 
 if __name__ == '__main__':
