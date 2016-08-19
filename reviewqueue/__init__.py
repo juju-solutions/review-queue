@@ -7,8 +7,6 @@ from pyramid.request import Request
 from pyramid.security import Allow
 from pyramid.security import Everyone
 from pyramid.security import unauthenticated_userid
-from pyramid.session import SignedCookieSessionFactory
-from paste.deploy.converters import asbool
 
 from sqlalchemy import engine_from_config
 
@@ -74,9 +72,6 @@ def main(global_config, **settings):
         authentication_policy=authn_policy,
         authorization_policy=authz_policy,
         request_factory=CustomRequest,
-        session_factory=SignedCookieSessionFactory(
-            settings['session.secret'],
-            secure=asbool(settings['session.secure'])),
         root_factory=RootFactory,
     )
     config.add_subscriber(add_renderer_globals, BeforeRender)
