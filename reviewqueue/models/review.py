@@ -82,6 +82,42 @@ class Review(Versioned, Base):
             .first()
         )
 
+    def get_progress(self):
+        """Return a dictionary denoting the progress of the review.
+
+        Example::
+
+            {
+                'passing': 4,
+                'failing': 5,
+                'total': 10,
+            }
+
+        Note: Progress is calculated using *required* policy checks only;
+        optional policy checks are not included.
+
+        """
+        from .other import Policy, ReviewPolicyCheck
+
+        total_count = DBSession.query(Policy).filter_by(required=True).count()
+        pass_count = (
+            DBSession.query(ReviewPolicyCheck)
+            .filter_by(review_id=self.id)
+            .filter_by(status=1)
+            .count()
+        )
+        fail_count = (
+            DBSession.query(ReviewPolicyCheck)
+            .filter_by(review_id=self.id)
+            .filter_by(status=2)
+            .count()
+        )
+        return {
+            'passing': pass_count,
+            'failing': fail_count,
+            'total': total_count,
+        }
+
     @property
     def age(self):
         return datetime.datetime.utcnow() - self.created_at
