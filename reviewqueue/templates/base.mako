@@ -3,8 +3,8 @@
 <html>
   <head>
     <title>Review Queue</title>
-    <link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link href='//fonts.googleapis.com/css?family=Ubuntu:300,400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="${request.static_url('reviewqueue:static/css/pygments.formatters.HtmlFormatter.css')}">
     <link rel="stylesheet" href="${request.static_url('reviewqueue:static/css/app.css')}">
   </head>
@@ -46,8 +46,8 @@
       </div>
     </footer>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="${request.static_url('reviewqueue:static/javascript/app.js')}"></script>
   </body>
 </html>
@@ -64,5 +64,5 @@
 </%def>
 
 <%def name="user_link(user)">
-  <a href="https://launchpad.net/~${user.nickname}">${user.nickname}</a>
+  <a href="//launchpad.net/~${user.nickname}">${user.nickname}</a>
 </%def>
