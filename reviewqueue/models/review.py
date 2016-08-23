@@ -102,14 +102,18 @@ class Review(Versioned, Base):
         total_count = DBSession.query(Policy).filter_by(required=True).count()
         pass_count = (
             DBSession.query(ReviewPolicyCheck)
-            .filter_by(review_id=self.id)
-            .filter_by(status=1)
+            .join(Policy)
+            .filter(Policy.required == True)
+            .filter(ReviewPolicyCheck.review_id == self.id)
+            .filter(ReviewPolicyCheck.status == 1)
             .count()
         )
         fail_count = (
             DBSession.query(ReviewPolicyCheck)
-            .filter_by(review_id=self.id)
-            .filter_by(status=2)
+            .join(Policy)
+            .filter(Policy.required == True)
+            .filter(ReviewPolicyCheck.review_id == self.id)
+            .filter(ReviewPolicyCheck.status == 2)
             .count()
         )
         return {
