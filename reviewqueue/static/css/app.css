@@ -133,3 +133,6 @@ td.diff-comment {
   background-color: #ed3a3a;
   border-color: #ed3a3a;
 }
+.test-results {
+    table-layout: fixed;
+}

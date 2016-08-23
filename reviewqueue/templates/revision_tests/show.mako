@@ -1,6 +1,6 @@
 <%inherit file="../base.mako"/>
 
-<table class="table">
+<table class="table test-results">
   <thead>
     <tr>
       <th>Suite</th>
