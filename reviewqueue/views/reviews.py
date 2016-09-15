@@ -102,8 +102,8 @@ def validate(request):
         Error, can only submit your own charms for review
 
     If no revision specified:
-        If promulgated, use development channel
-            Re-pull from development channel
+        If promulgated, use edge channel
+            Re-pull from edge channel
         If not promulgated, use stable channel
 
     If (revision specified in original url and \
@@ -143,7 +143,7 @@ def validate(request):
     promulgated = charmstore_entity['Meta']['promulgated']['Promulgated']
     if not revision_number:
         if promulgated:
-            channel = 'development'
+            channel = 'edge'
             charmstore_entity = h.get_charmstore_entity(
                 cs, source_url, channel=channel)
         else:

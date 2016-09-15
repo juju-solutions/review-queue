@@ -25,7 +25,7 @@ revision number is included and the charm is not yet promulgated, the
 revision must be the latest in the stable channel.<p>
 
 <p>If a revision is not specified, the latest revision in the stable
-channel (for a non-promulgated charm) or the development channel (for
+channel (for a non-promulgated charm) or the edge channel (for
 a promulgated charm) will be used.<p>
 
 %if validation_result and 'error' in validation_result:
