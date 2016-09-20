@@ -41,7 +41,7 @@ class DB(object):
             promulgated_entity = h.get_charmstore_entity(
                 cs, 'cs:{}'.format(review.charm_name))
             promulgated_revision_url = (
-                promulgated_entity['Meta']['revision-info']['Revisions'][0])
+                promulgated_entity['Id'])
             review.revisions.append(
                 M.Revision(revision_url=promulgated_revision_url)
             )

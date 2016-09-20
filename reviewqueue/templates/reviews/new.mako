@@ -54,8 +54,7 @@ a promulgated charm) will be used.<p>
   <div class="form-group">
     <label for="description">Description of changes (optional)</label>
     <textarea class="form-control" id="description" name="description"
-      rows="5" placeholder="">${request.params.get('description') or ''}
-    </textarea>
+      rows="5" placeholder="">${request.params.get('description') or ''}</textarea>
   </div>
   <div class="checkbox">
     <label>
