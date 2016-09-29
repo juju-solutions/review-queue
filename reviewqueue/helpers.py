@@ -1,5 +1,6 @@
 import difflib
 import filecmp
+import fnmatch
 import logging
 import itertools
 import operator
@@ -18,6 +19,14 @@ from launchpadlib.launchpad import Launchpad
 from theblues.charmstore import CharmStore
 
 log = logging.getLogger(__name__)
+
+
+# Override filecmp's default filter func to work with glob patterns
+def _file_glob_filter(flist, skip):
+    return [
+        item for item in flist
+        if not any(fnmatch.fnmatch(item, pat) for pat in skip)]
+filecmp._filter = _file_glob_filter
 
 
 def sendgrid_email(msg, sendgrid_api_key):
@@ -124,7 +133,8 @@ class Diff(object):
 
         changes = custom_dircmp(
             tmp_from_dir or self.from_dir,
-            self.to_dir).report_full_closure_changes()
+            self.to_dir,
+            ignore=['*.pyc']).report_full_closure_changes()
 
         # do diff
         if tmp_from_dir:
@@ -183,7 +193,9 @@ class custom_dircmp(filecmp.dircmp):
                     else:
                         changes.extend([
                             Change(None, os.path.join(root, filename))
-                            for filename in files])
+                            for filename in filecmp._filter(
+                                files, self.ignore + self.hide)
+                        ])
             else:
                 changes.append(
                     Change(None, fpath))
