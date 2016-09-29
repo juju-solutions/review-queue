@@ -29,7 +29,7 @@ channel (for a non-promulgated charm) or the edge channel (for
 a promulgated charm) will be used.<p>
 
 %if validation_result and 'error' in validation_result:
-<p class='bg-danger'>
+<div class='alert alert-danger'>
   %if 'NotFound' == validation_result['error']:
     Couldn't find ${validation_result['source_url']} in the Charm Store.
     Have you granted read permissions (see above)?
@@ -40,7 +40,7 @@ a promulgated charm) will be used.<p>
     A review of a non-promulgated charm must be against the latest revision
     in the stable channel. Try removing the revision from the url.
   %endif
-</p>
+</div>
 %endif
 
 <form action="/reviews/create" method="post">
