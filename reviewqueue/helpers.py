@@ -6,6 +6,7 @@ import os
 import tempfile
 
 import arrow  # noqa
+import markupsafe
 import requests
 
 from pygments.formatters import HtmlFormatter
@@ -46,6 +47,14 @@ def smtp_email(msg, request):
         html=msg['html'])
 
     mailer.send(message)
+
+
+def linesplit(s):
+    """Convert newline chars to html line breaks.
+
+    """
+    return '<br>'.join(
+        markupsafe.escape(line) for line in (s or '').split('\n'))
 
 
 def human_vote(vote):

@@ -28,7 +28,7 @@
   <strong>OIL?:</strong> ${'Yes' if review.is_oil else 'No'}<br>
 </p>
 % if review.description:
-<p>${review.description}</p>
+<p>${review.description | h.linesplit}</p>
 % endif
 
 <hr>
@@ -107,7 +107,7 @@
     ${self.user_link(comment.user)} wrote ${self.human_date(comment.created_at)}
   </div>
   <div class="panel-body">
-    ${comment.text.replace('\n', '<br>') | n}
+    ${comment.text | h.linesplit}
   </div>
 </div>
 %endfor

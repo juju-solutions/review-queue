@@ -1,6 +1,6 @@
 ${comment.user.fullname} said:
 
-<blockquote>${(comment.text or '').replace('\n', '<br>') | n}</blockquote>
+<blockquote>${comment.text | h.linesplit}</blockquote>
 
 Current Vote: ${comment.revision.review.vote}<br>
 Current Staus: ${comment.revision.review.status}<br>
