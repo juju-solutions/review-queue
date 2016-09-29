@@ -87,7 +87,7 @@ def new(request, validation_result=None):
     }
 
 
-def validate(request):
+def validate(source_url, user, settings):
     """Validate a Review Submission
 
     POST /reviews/validate
@@ -116,12 +116,10 @@ def validate(request):
         Prompt to confirm revision/channel
 
     """
-    source_url = request.params['source_url']
-
     match = re.match(r'^(.*)-(\d+)$', source_url)
     revision_number = match.group(2) if match else None
 
-    cs = h.charmstore(request.registry.settings)
+    cs = h.charmstore(settings)
     try:
         charmstore_entity = h.get_charmstore_entity(cs, source_url)
     except EntityNotFound:
@@ -132,8 +130,8 @@ def validate(request):
 
     charm_owner = charmstore_entity['Meta']['owner']['User']
     if (charm_owner not in
-            request.user.get_groups(request.registry.settings) and
-            not request.user.is_charmer):
+            user.get_groups(settings) and
+            not user.is_charmer):
         return {
             'error': 'NotOwner',
             'owner': charm_owner,
@@ -202,9 +200,12 @@ def create(request):
 
     """
     source_url = request.params['source_url']
+    if source_url.startswith('cs:'):
+        source_url = source_url[len('cs:'):]
+
     description = request.params.get('description')
 
-    result = validate(request)
+    result = validate(source_url, request.user, request.registry.settings)
 
     if 'error' in result:
         return render_to_response(
