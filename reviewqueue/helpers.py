@@ -2,6 +2,7 @@ import difflib
 import filecmp
 import logging
 import itertools
+import operator
 import os
 import tempfile
 
@@ -129,10 +130,10 @@ class Diff(object):
         if tmp_from_dir:
             os.rmdir(tmp_from_dir)
 
-        return [
+        return sorted([
             c.set_root_dirs(self.from_root_dir, self.to_root_dir)
             for c in changes
-        ]
+        ], key=operator.attrgetter('description'))
 
 
 class custom_dircmp(filecmp.dircmp):

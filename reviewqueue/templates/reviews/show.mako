@@ -228,7 +228,23 @@
 <h2>Source Diff</h2>
 
 <% diff_comments = revision.diff_comments %>
-% for change in revision.get_diff(request.registry.settings, prior_revision=diff_revision).get_changes():
+<% changes = revision.get_diff(request.registry.settings, prior_revision=diff_revision).get_changes() %>
+
+<div class="panel panel-default">
+  <a name="file-index"></a>
+  <div class="panel-heading">
+    <h3 class="panel-title">Files changed</h3>
+  </div>
+  <div class="panel-body">
+    <ul class="list-unstyled">
+    % for change in changes:
+      <li><a href="#${id(change)}">${change.description}</a></li>
+    % endfor
+    </ul>
+  </div>
+</div>
+
+% for change in changes:
   <%
     change_diff_comments = {}
     for d in diff_comments:
@@ -238,8 +254,11 @@
     diff = change.pygments_diff(change_diff_comments, context=True)
   %>
   % if diff:
-  <h3>${change.description}</h3>
-  ${diff | n}
+  <div>
+    <a href="#file-index" class="pull-right">Back to file index</a>
+    <h4><a name="${id(change)}"></a><a href="#${id(change)}">${change.description}</a></h4>
+    ${diff | n}
+  </div>
   % endif
 % endfor
 
