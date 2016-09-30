@@ -230,17 +230,39 @@
 <% diff_comments = revision.diff_comments %>
 <% changes = revision.get_diff(request.registry.settings, prior_revision=diff_revision).get_changes() %>
 
-<div class="panel panel-default">
-  <a name="file-index"></a>
-  <div class="panel-heading">
-    <h3 class="panel-title">Files changed</h3>
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <a name="file-index"></a>
+      <div class="panel-heading">
+        <h3 class="panel-title">Files changed <span class="badge">${len(changes)}</span></h3>
+      </div>
+      <div class="panel-body">
+        <ul class="list-unstyled">
+        % for change in changes:
+          <li><a href="#${id(change)}">${change.description}</a></li>
+        % endfor
+        </ul>
+      </div>
+    </div>
   </div>
-  <div class="panel-body">
-    <ul class="list-unstyled">
-    % for change in changes:
-      <li><a href="#${id(change)}">${change.description}</a></li>
-    % endfor
-    </ul>
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Inline diff comments <span class="badge">${len(diff_comments)}</span></h3>
+      </div>
+      <div class="panel-body">
+        % if not diff_comments:
+          <p>No comments yet.</p>
+        % else:
+          <ul class="list-unstyled">
+          % for comment in diff_comments:
+            <li><a href="#${id(comment)}" class="truncate">${comment.text}</a></li>
+          % endfor
+          </ul>
+        % endif
+      </div>
+    </div>
   </div>
 </div>
 

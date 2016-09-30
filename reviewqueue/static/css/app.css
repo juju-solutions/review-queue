@@ -136,3 +136,15 @@ td.diff-comment {
 .test-results {
     table-layout: fixed;
 }
+.truncate {
+    max-width: 100%;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.prev-diff-comment,
+.next-diff-comment {
+  display: none;
+}

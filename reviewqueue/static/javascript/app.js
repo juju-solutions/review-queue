@@ -1,4 +1,7 @@
 $(function() {
+  /*
+   * Do ajax form submit when Policy items are checked
+   */
   $('#policyForm input[type=radio]').on('change', function() {
     var self = $(this);
 
@@ -26,7 +29,73 @@ $(function() {
   });
 
   /*
-   * Showe "add diff comment" button when hovering over a diff row
+   * Show next/prev links when hovering over diff comment
+   */
+  $('table.highlighttable').on('mouseenter', '.diff-comment', function() {
+    var self = $(this);
+    var prev_link = self.find('.prev-diff-comment');
+    var next_link = self.find('.next-diff-comment');
+
+    var all_comments = $('.diff-comment');
+    var curr_index = all_comments.index(self);
+
+    if (curr_index > 0) {
+      prev_link.show()
+    }
+
+    if (curr_index + 1 < all_comments.length) {
+      next_link.show()
+    }
+  });
+
+  /*
+   * Hide next/prev links when done hovering over diff comment
+   */
+  $('table.highlighttable').on('mouseleave', '.diff-comment', function() {
+    var self = $(this);
+    var prev_link = self.find('.prev-diff-comment');
+    var next_link = self.find('.next-diff-comment');
+
+    prev_link.hide()
+    next_link.hide()
+  });
+
+  /*
+   * Scroll to next diff comment
+   */
+  $('table.highlighttable').on('click', '.next-diff-comment', function(event) {
+    event.preventDefault();
+
+    var self = $(this);
+
+    var all_comments = $('.diff-comment');
+    var curr_index = all_comments.index(self.closest('.diff-comment'));
+    var next_comment = all_comments.eq(curr_index + 1);
+
+    if (next_comment.length) {
+      $(document).scrollTop(next_comment.offset().top);
+    }
+  });
+
+  /*
+   * Scroll to prev diff comment
+   */
+  $('table.highlighttable').on('click', '.prev-diff-comment', function(event) {
+    event.preventDefault();
+
+    var self = $(this);
+
+    var all_comments = $('.diff-comment');
+    var curr_index = all_comments.index(self.closest('.diff-comment'));
+    var prev_comment = all_comments.eq(curr_index - 1);
+
+    if (prev_comment.length) {
+      $(document).scrollTop(prev_comment.offset().top);
+    }
+  });
+
+  /*
+   * Show "add diff comment" button when hovering over a diff row
    */
   $('table.highlighttable tr').on('mouseenter', function() {
     var self = $(this);
@@ -51,6 +120,9 @@ $(function() {
     td.append(btn);
   });
 
+  /*
+   * Remove "add diff comment" button when mouse leaves row
+   */
   $('table.highlighttable tr').on('mouseleave', function() {
     var addDiffCommentBtn = $(this).find('.btn.add-diff-comment');
     addDiffCommentBtn.remove();
@@ -60,6 +132,9 @@ $(function() {
     $(this).remove();
   });
 
+  /*
+   * Insert/show new diff comment form
+   */
   $('td.linenos').on('click', '.btn.add-diff-comment', function(event) {
     var tr = $(this).closest('tr');
     $(this).remove();
@@ -79,13 +154,16 @@ $(function() {
     tr.next().find('textarea').focus();
   });
 
+  /*
+   * Do ajax form submit for new diff comment
+   */
   $('table.highlighttable').on('submit', '#diffCommentForm', function(event) {
     event.preventDefault();
 
     var form = $(this);
     var comment = form.find('textarea').val();
     var line_start = form.closest('tr').prev().find('td.linenos pre').text();
-    var filename = form.closest('table').prev('h3').text();
+    var filename = form.closest('table').data('filename');
     var revision_id = $('#revision-id').text();
 
     $.post("/revisions/" + revision_id + "/diff_comment", {
@@ -100,14 +178,23 @@ $(function() {
     });
   });
 
+  /*
+   * Remove row with diff comment form if Cancel clicked
+   */
   $('table.highlighttable').on('click', '.btn.diff-comment-cancel', function(event) {
     $(this).closest('tr').remove();
   });
 
+  /*
+   * Show/hide test details
+   */
   $('.test-detail-toggle').on('click', function(event) {
     $(this).closest('tr').next().toggle();
   });
 
+  /*
+   * Show/hide extra Policy detail
+   */
   $('.glyphicon-info-sign').on('click', function(event) {
     $(this).closest('tr').next().toggle();
   });

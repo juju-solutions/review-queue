@@ -299,7 +299,12 @@ class Change(object):
         return highlight(
             diff_text,
             DiffLexer(),
-            TableFormatter(linenos="table", comments=comments))
+            TableFormatter(
+                linenos="table",
+                comments=comments,
+                filename=self.description,
+            )
+        )
 
     def _get_lines(self, filename):
         if not filename:
@@ -309,8 +314,9 @@ class Change(object):
 
 class TableFormatter(HtmlFormatter):
     def __init__(self, *args, **kw):
-        self.comments = kw.pop('comments', {}) or {}
         super(TableFormatter, self).__init__(*args, **kw)
+        self.comments = kw.pop('comments', {}) or {}
+        self.filename = kw.pop('filename')
 
     def _wrap_tablelinenos(self, inner):
         dummyoutfile = StringIO()
@@ -358,7 +364,7 @@ class TableFormatter(HtmlFormatter):
                     lines.append('')
             ls = '\n'.join(lines)
 
-        yield 0, ('<table class="%stable">' % self.cssclass)
+        yield 0, ('<table class="%stable" data-filename="%s">' % (self.cssclass, self.filename))
         lineno = fl
         for lineno_html, code in itertools.izip(ls.split('\n'), dummyoutfile.getvalue().split('\n')):
             if nocls:
@@ -398,7 +404,12 @@ def render_diff_comment(lineno, comments):
     for c in comments:
         panel = '''
         <div class="panel panel-default">
+          <a name="{anchor}"></a>
           <div class="panel-heading">
+            <div class="pull-right">
+                <a href="#" class="prev-diff-comment" title="Previous diff comment">prev</a>
+                <a href="#" class="next-diff-comment" title="Next diff comment">next</a>
+            </div>
             <a href="/users/{user}">{user}</a> commented
             <span title="{timestamp}">{human_timestamp}</span></div>
           <div class="panel-body">
@@ -406,6 +417,7 @@ def render_diff_comment(lineno, comments):
           </div>
         </div>
         '''.format(
+            anchor=id(c),
             user=c.user.nickname,
             timestamp=c.created_at,
             human_timestamp=arrow.get(c.created_at).humanize(),
