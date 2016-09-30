@@ -20,13 +20,25 @@
 
 <h1>
   <img src="${review.icon_url(request.registry.settings)}" class="charm-icon" />
-  ${review.source_url}</h1>
-<p>
-  <strong>Status:</strong> ${review.human_status}<br>
-  <strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)<br>
-  <strong>CPP?:</strong> ${'Yes' if review.is_cpp else 'No'}<br>
-  <strong>OIL?:</strong> ${'Yes' if review.is_oil else 'No'}<br>
-</p>
+  ${review.source_url}
+</h1>
+
+<div class="row">
+  <div class="col-md-6">
+    <p>
+    <strong>Owner:</strong> <a href="${request.route_url('users_show', nickname=review.user.nickname)}">${review.user.nickname}</a><br>
+    <strong>Status:</strong> ${review.human_status}<br>
+    <strong>Vote:</strong> ${review.human_vote} (+2 needed for approval)<br>
+    </p>
+  </div>
+  <div class="col-md-6">
+    <p>
+    <strong>CPP?:</strong> ${'Yes' if review.is_cpp else 'No'}<br>
+    <strong>OIL?:</strong> ${'Yes' if review.is_oil else 'No'}<br>
+    </p>
+  </div>
+</div>
+
 % if review.description:
 <p>${review.description | h.linesplit}</p>
 % endif
