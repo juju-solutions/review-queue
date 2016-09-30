@@ -87,6 +87,8 @@
         <td>
           % if test.results:
             <a href="${request.route_url('revision_tests_show', id=test.id)}">Test Results</a>
+          % elif test.url:
+            <a href="${test.url}console">${test.url}console</a>
           % endif
         </td>
         <td>${self.human_date(test.updated_at or test.created_at)}</td>

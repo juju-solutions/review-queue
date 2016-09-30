@@ -37,6 +37,9 @@ serve: .venv
 	$(PYHOME)/initialize_db development.ini
 	$(PYHOME)/pserve --reload development.ini
 
+celery: .venv
+	$(PYHOME)/celery -A reviewqueue.celerycfg worker -l info -B
+
 smtp:
 	# Runs a local smtp server for testing email features
 	python -m smtpd -n -c DebuggingServer localhost:2525
