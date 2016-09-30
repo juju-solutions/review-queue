@@ -214,7 +214,7 @@ def create(request):
             request=request)
 
     db = DB()
-    db.create_review(
+    review = db.create_review(
         request.user,
         source_url,
         description,
@@ -225,7 +225,9 @@ def create(request):
         result['latest_revision_url'],
         request.registry.settings,
     )
-    return HTTPFound(location=request.route_url('reviews_index'))
+    return HTTPFound(
+        location=request.route_url('reviews_show', id=review.id)
+    )
 
 
 @view_config(
