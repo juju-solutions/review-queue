@@ -1,5 +1,12 @@
 $(function() {
   /*
+   * Disable submit button after click
+   */
+  $('form[action="/reviews/create"]').on('submit', function() {
+    $(this).find('button[type=submit]').text('Loading...').prop('disabled', true);
+  });
+
+  /*
    * Do ajax form submit when Policy items are checked
    */
   $('#policyForm input[type=radio]').on('change', function() {

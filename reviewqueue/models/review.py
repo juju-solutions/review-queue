@@ -67,6 +67,7 @@ class Review(Versioned, Base):
             .filter(~cls.status.in_([
                 'CLOSED',
             ]))
+            .order_by(cls.created_at)
         )
 
     def icon_url(self, settings):
