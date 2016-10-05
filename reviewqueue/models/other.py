@@ -271,11 +271,17 @@ class Revision(Base):
 
     def fetch_source(self, settings):
         source_dir = self.get_source_dir(settings)
-        if os.path.exists(source_dir):
-            return source_dir
-        else:
+
+        # If we don't have a source dir for this revision, make one
+        if not os.path.exists(source_dir):
             os.mkdir(source_dir)
 
+        # If the source dir has contents, that means we've already
+        # fetched the source for this revision and can return now
+        if os.listdir(source_dir):
+            return source_dir
+
+        # We don't have the source for this revision yet - fetch it
         archive_path = h.download_file(
             self.archive_url(settings))
         with zipfile.ZipFile(archive_path, "r") as z:
