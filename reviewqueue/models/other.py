@@ -338,7 +338,7 @@ class Comment(Base):
     def html(self, request):
         return render(
             'emails/comment.mako',
-            dict(comment=self, request=request))
+            dict(comment=self, request=request, h=h))
 
     def email(self, request):
         settings = request.registry.settings
