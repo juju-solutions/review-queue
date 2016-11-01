@@ -12,14 +12,14 @@
   <tbody>
   % for test in (revision_test.results or {}).get('tests', []):
     <tr>
-      <td>${test['suite']}</td>
-      <td>${test['test']}</td>
-      <td>${test['returncode']}</td>
-      <td>${test['duration']}</td>
+      <td>${test.get('suite')}</td>
+      <td>${test.get('test')}</td>
+      <td>${test.get('returncode')}</td>
+      <td>${test.get('duration')}</td>
       <td><a href="#" class="test-detail-toggle">Detail</a></td>
     </tr>
     <tr class="test-detail">
-      <td colspan="5"><pre>${test['output']}</pre></td>
+      <td colspan="5"><pre>${test.get('output')}</pre></td>
     </tr>
   % endfor
   </tbody>
