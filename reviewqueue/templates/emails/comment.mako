@@ -1,3 +1,5 @@
+<% from reviewqueue import helpers as h %>
+
 ${comment.user.fullname} said:
 
 <blockquote>${comment.text | h.linesplit}</blockquote>
