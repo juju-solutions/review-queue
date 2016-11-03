@@ -1,7 +1,7 @@
 import datetime
 import logging
 import os
-import zipfile
+import subprocess
 
 import requests
 
@@ -147,6 +147,15 @@ class Revision(Base):
     diff_comments = relationship('DiffComment', backref=backref('revision'))
 
     @property
+    def charmstore_url(self):
+        """Return a charmstore-compatible url for this revision.
+
+        """
+        if self.revision_url.startswith('cs:'):
+            return self.revision_url[len('cs:'):]
+        return self.revision_url
+
+    @property
     def shortname(self):
         return self.revision_url.split('/')[-1]
 
@@ -244,14 +253,6 @@ class Revision(Base):
         for revision_test in revision_tests:
             revision_test.send_ci_request(settings)
 
-    def archive_url(self, settings):
-        revision_url = self.revision_url
-        if revision_url.startswith('cs:'):
-            revision_url = revision_url[len('cs:'):]
-
-        cs = h.charmstore(settings)
-        return cs.archive_url(revision_url)
-
     def get_diff(self, settings, prior_revision=None):
         if not prior_revision:
             prior_revision = (
@@ -269,6 +270,34 @@ class Revision(Base):
             self.get_source_dir(settings),
         )
 
+    def handle_terms(self, settings):
+        """Check for existence of juju terms on this revision, and accept them.
+
+        If there are no terms for this revision, do nothing. Terms must be
+        accepted in order to download the charm payload.
+
+        """
+        cs = h.charmstore(settings)
+        charmstore_entity = h.get_charmstore_entity(
+            cs, self.charmstore_url,
+            channel=self.review.channel)
+        terms = charmstore_entity['Meta']['terms']
+        if not terms:
+            log.debug('No terms for %s', self.charmstore_url)
+            return
+
+        cmd = ['juju', 'agree', '-B', '--yes'] + terms
+        try:
+            log.debug(
+                'Agreeing to terms for %s: %s',
+                self.charmstore_url, ' '.join(cmd))
+            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            log.error(
+                "Failed to agree to terms for {}:\n{}".format(
+                    self.charmstore_url, e.output)
+            )
+
     def fetch_source(self, settings):
         source_dir = self.get_source_dir(settings)
 
@@ -282,11 +311,9 @@ class Revision(Base):
             return source_dir
 
         # We don't have the source for this revision yet - fetch it
-        archive_path = h.download_file(
-            self.archive_url(settings))
-        with zipfile.ZipFile(archive_path, "r") as z:
-            z.extractall(source_dir)
-        os.unlink(archive_path)
+        h.charmstore_login(settings)
+        self.handle_terms(settings)
+        h.charm_pull(self.charmstore_url, source_dir)
 
         return source_dir
 

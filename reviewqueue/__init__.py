@@ -79,6 +79,7 @@ def main(global_config, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
 
     config.include('reviewqueue.views.auth')
+    config.include('reviewqueue.views.exc')
     config.include('reviewqueue.views.home')
     config.include('reviewqueue.views.reviews')
     config.include('reviewqueue.views.users')

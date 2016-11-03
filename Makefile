@@ -22,12 +22,11 @@ test: .venv
 	$(PYHOME)/tox
 
 .venv:
-	# install deps for theblues (https://github.com/juju/theblues#installation)
-	#sudo add-apt-repository ppa:yellow/ppa -y
-	#sudo apt-get update -qy
-	#sudo apt-get install -qy libmacaroons0 python-macaroons libsodium13
+	# we need the juju client so we can agree to charm terms
+	sudo add-apt-repository ppa:juju/stable -y
+	sudo apt update
 	# create virtualenv, install app deps
-	sudo apt-get install -qy virtualenv libpq-dev python-dev
+	sudo apt-get install -qy virtualenv libpq-dev python-dev juju charm
 	virtualenv --never-download .venv
 
 	$(PYHOME)/pip install --no-index -f deps/ -r requirements.txt
