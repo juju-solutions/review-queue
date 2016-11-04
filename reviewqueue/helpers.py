@@ -1,3 +1,4 @@
+import base64
 import difflib
 import filecmp
 import fnmatch
@@ -92,46 +93,23 @@ def get_lp(login=True):
 
 
 def charmstore_login(settings):
-    """Login to the charmstore if not already logged in.
+    """Login to the charmstore.
+
+    As long as we have an oauth token (which will be passed in via config),
+    `charm login` should be non-interactive, creating/refreshing ~/.go-cookies
+    as necessary.
 
     """
-    def logged_in():
-        """Return True if logged in, else False.
-
-        """
-        try:
-            cmd = ['charm', 'whoami']
-            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-            if 'not logged in' in output:
-                return False
-        except subprocess.CalledProcessError:
-            return False
-        return True
-
-    def do_login():
-        """Login using `charm login`.
-
-        $ charm login
-        Press return to select a default value.
-        Username: myusername
-        Password:
-        Two-factor auth (Enter for none):
-
-        """
-        log.debug('Logging in to charmstore')
-
-        import pexpect
-        child = pexpect.spawn('charm login')
-        child.expect('.*Username: ')
-        child.sendline(settings['charmstore.user'])
-        child.expect('Password: ')
-        child.sendline(settings['charmstore.password'])
-        child.expect('.*Two-factor auth \(Enter for none\): ')
-        child.sendline()
-        child.expect(pexpect.EOF)
-
-    if not logged_in():
-        do_login()
+    token_path = os.path.expanduser('~/.local/share/juju/store-usso-token')
+    if not os.path.exists(token_path):
+        token_value = settings.get('charmstore.usso_token')
+        if not token_value:
+            raise ValueError('Missing USSO token')
+        with open(token_path, 'w') as f:
+            f.write(base64.b64decode(token_value))
+        os.chmod(token_path, 0o600)
+    cmd = ['charm', 'login']
+    return subprocess.call(cmd) == 0
 
 
 def charmstore(settings):
