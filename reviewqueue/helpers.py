@@ -1,3 +1,4 @@
+import base64
 import difflib
 import filecmp
 import fnmatch
@@ -5,11 +6,12 @@ import logging
 import itertools
 import operator
 import os
+import shutil
+import subprocess
 import tempfile
 
 import arrow  # noqa
 import markupsafe
-import requests
 
 from pygments.formatters import HtmlFormatter
 from pygments.util import StringIO
@@ -90,6 +92,26 @@ def get_lp(login=True):
         credential_save_failed=lambda: None)
 
 
+def charmstore_login(settings):
+    """Login to the charmstore.
+
+    As long as we have an oauth token (which will be passed in via config),
+    `charm login` should be non-interactive, creating/refreshing ~/.go-cookies
+    as necessary.
+
+    """
+    token_path = os.path.expanduser('~/.local/share/juju/store-usso-token')
+    if not os.path.exists(token_path):
+        token_value = settings.get('charmstore.usso_token')
+        if not token_value:
+            raise ValueError('Missing USSO token')
+        with open(token_path, 'w') as f:
+            f.write(base64.b64decode(token_value))
+        os.chmod(token_path, 0o600)
+    cmd = ['charm', 'login']
+    return subprocess.call(cmd) == 0
+
+
 def charmstore(settings):
     return CharmStore(settings['charmstore.api.url'])
 
@@ -102,21 +124,29 @@ def get_charmstore_entity(
         'promulgated',
         'id-name',
         'owner',
+        'terms',
     ]
     if get_files:
         includes.append('manifest')
     return charmstore._meta(entity_id, includes, channel=channel)
 
 
-def download_file(url):
-    r = requests.get(url, stream=True)
-    f = tempfile.NamedTemporaryFile(delete=False)
-    log.debug('Downloading %s to %s', url, f.name)
-    with f:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-    return f.name
+def charm_pull(charmstore_url, dest_dir):
+    """Download a charm from the charmstore.
+
+    :param charmstore_url: e.g. ~juju-solutions/review-queue
+    :param dest_dir: the dir into which the charm source should be placed
+    :return: True if successful, else False
+
+    """
+    cmd = ['charm', 'pull', charmstore_url, dest_dir]
+    if os.path.exists(dest_dir):
+        shutil.rmtree(dest_dir)
+
+    log.debug('Pulling charm: %s', ' '.join(cmd))
+    # It's possible for this command to fail at first but then succeed on the
+    # second try. See https://github.com/juju/charmstore/issues/618.
+    return subprocess.call(cmd) == 0 or subprocess.call(cmd) == 0
 
 
 class Diff(object):
