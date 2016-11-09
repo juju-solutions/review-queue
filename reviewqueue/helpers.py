@@ -1,5 +1,6 @@
 import base64
 import difflib
+import errno
 import filecmp
 import fnmatch
 import logging
@@ -105,6 +106,14 @@ def charmstore_login(settings):
         token_value = settings.get('charmstore.usso_token')
         if not token_value:
             raise ValueError('Missing USSO token')
+        if not os.path.isdir(os.path.dirname(token_path)):
+            try:
+                os.makedirs(os.path.dirname(token_path))
+            except OSError as e:
+                if e.errno == errno.EEXIST:
+                    pass
+                else:
+                    raise
         with open(token_path, 'w') as f:
             f.write(base64.b64decode(token_value))
         os.chmod(token_path, 0o600)
