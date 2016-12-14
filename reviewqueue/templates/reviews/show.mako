@@ -48,13 +48,7 @@
 <ul class="nav nav-tabs">
   % for i, rev in enumerate(review.revisions):
   <li role="presentation" class="${'active' if rev == revision else ''}">
-    <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':rev.id})}">
-      % if i == 0:
-        <span title="${rev.shortname}">Latest revision</span>
-      % else:
-        ${rev.shortname}
-      % endif
-    </a>
+    <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':rev.id})}">${rev.shortname}</a>
   </li>
   % endfor
 	% if request.user and (request.user == review.user or request.user.is_charmer):
