@@ -8,7 +8,7 @@
   <li>Uploaded and published your charm to the Charm store, e.g.:
     <div>
       <code>$ cd ~/charms/meteor</code><br>
-      <code>$ charm push . cs:~tvansteenburgh/meteor</code>
+      <code>$ charm push . cs:~tvansteenburgh/meteor</code><br>
       <code>$ charm publish cs:~tvansteenburgh/meteor-0</code>
     </div>
   </li>
