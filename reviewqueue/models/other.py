@@ -143,7 +143,8 @@ class Revision(Base):
     _position = Column(Integer)
 
     tests = relationship('RevisionTest', backref=backref('revision'))
-    comments = relationship('Comment', backref=backref('revision'))
+    comments = relationship(
+        'Comment', backref=backref('revision'), order_by='Comment.id')
     diff_comments = relationship('DiffComment', backref=backref('revision'))
 
     @property
