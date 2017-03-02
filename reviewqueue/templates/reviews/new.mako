@@ -17,6 +17,9 @@
       <code>$ charm grant cs:~tvansteenburgh/meteor everyone</code>
     </div>
   </li>
+  <li>If your charm uses terms, release all terms using the <code>charm release-term</code>
+    command (<a href="https://jujucharms.com/docs/2.0/developer-terms#releasing-terms">docs</a>).
+  </li>
   <li>Are the owner of the charm, or a member of the team that owns the charm</li>
 </ul>
 
