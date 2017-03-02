@@ -157,6 +157,8 @@ class Review(Versioned, Base):
         cs = h.charmstore(settings)
         charmstore_entity = h.get_charmstore_entity(
             cs, self.source_url, channel=self.channel)
+        if not charmstore_entity:
+            return []
         remote_revisions = (
             charmstore_entity['Meta']['revision-info']['Revisions'])
         current_revision = self.latest_revision.revision_url
@@ -172,6 +174,8 @@ class Review(Versioned, Base):
         charmstore_entity = h.get_charmstore_entity(
             cs, self.source_url,
             channel=self.channel)
+        if not charmstore_entity:
+            return
         remote_revisions = (
             charmstore_entity['Meta']['revision-info']['Revisions'])
         current_revision = self.latest_revision.revision_url

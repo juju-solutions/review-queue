@@ -21,6 +21,7 @@ from pygments.util import StringIO
 from binaryornot.check import is_binary
 from launchpadlib.launchpad import Launchpad
 from theblues.charmstore import CharmStore
+from theblues.errors import EntityNotFound
 
 log = logging.getLogger(__name__)
 
@@ -138,7 +139,10 @@ def get_charmstore_entity(
     ]
     if get_files:
         includes.append('manifest')
-    return charmstore._meta(entity_id, includes, channel=channel)
+    try:
+        return charmstore._meta(entity_id, includes, channel=channel)
+    except EntityNotFound:
+        return None
 
 
 class CharmFetchError(RuntimeError):

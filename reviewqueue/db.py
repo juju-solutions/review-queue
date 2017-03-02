@@ -40,11 +40,12 @@ class DB(object):
             cs = h.charmstore(settings)
             promulgated_entity = h.get_charmstore_entity(
                 cs, 'cs:{}'.format(review.charm_name))
-            promulgated_revision_url = (
-                promulgated_entity['Id'])
-            review.revisions.append(
-                M.Revision(revision_url=promulgated_revision_url)
-            )
+            if promulgated_entity:
+                promulgated_revision_url = (
+                    promulgated_entity['Id'])
+                review.revisions.append(
+                    M.Revision(revision_url=promulgated_revision_url)
+                )
 
         review.create_tests(settings)
         return review

@@ -120,9 +120,8 @@ def validate(source_url, user, settings):
     revision_number = match.group(2) if match else None
 
     cs = h.charmstore(settings)
-    try:
-        charmstore_entity = h.get_charmstore_entity(cs, source_url)
-    except EntityNotFound:
+    charmstore_entity = h.get_charmstore_entity(cs, source_url)
+    if not charmstore_entity:
         return {
             'error': 'NotFound',
             'source_url': source_url,
@@ -141,9 +140,19 @@ def validate(source_url, user, settings):
     promulgated = charmstore_entity['Meta']['promulgated']['Promulgated']
     if not revision_number:
         if promulgated:
-            channel = 'edge'
-            charmstore_entity = h.get_charmstore_entity(
-                cs, source_url, channel=channel)
+            for channel in ('candidate', 'beta', 'edge', 'unpublished'):
+                entity = h.get_charmstore_entity(
+                    cs, source_url, channel=channel)
+                if entity:
+                    charmstore_entity = entity
+                    break
+            else:
+                # can't access any channels proposed to
+                # replace the promulgated stable version
+                return {
+                    'error': 'NotFound',
+                    'source_url': source_url,
+                }
         else:
             channel = 'stable'
 
