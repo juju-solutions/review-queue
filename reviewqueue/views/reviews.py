@@ -225,6 +225,9 @@ def create(request):
         result['latest_revision_url'],
         request.registry.settings,
     )
+    # ensure review has an id
+    db.flush()
+
     return HTTPFound(
         location=request.route_url('reviews_show', id=review.id)
     )

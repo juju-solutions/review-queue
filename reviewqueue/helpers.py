@@ -7,6 +7,7 @@ import logging
 import itertools
 import operator
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -140,7 +141,27 @@ def get_charmstore_entity(
     return charmstore._meta(entity_id, includes, channel=channel)
 
 
-def charm_pull(charmstore_url, dest_dir):
+class CharmFetchError(RuntimeError):
+    def __init__(self, message, cmd):
+        super(CharmFetchError, self).__init__(message)
+        self.cmd = cmd
+        self.hint = self._hint(message)
+
+    def _hint(self, msg):
+        """Parse the original error message and attempt to translate it
+        into something user-friendly -- a message that can guide the user
+        towards a solution.
+
+        """
+        if re.search(r"user is not a member of required groups", msg):
+            return (
+                "Ensure that all terms for this charm have been released "
+                "using the `charm release-term` command."
+            )
+        return None
+
+
+def charm_pull(charmstore_url, dest_dir, _depth=0):
     """Download a charm from the charmstore.
 
     :param charmstore_url: e.g. ~juju-solutions/review-queue
@@ -153,9 +174,33 @@ def charm_pull(charmstore_url, dest_dir):
         shutil.rmtree(dest_dir)
 
     log.debug('Pulling charm: %s', ' '.join(cmd))
-    # It's possible for this command to fail at first but then succeed on the
-    # second try. See https://github.com/juju/charmstore/issues/618.
-    return subprocess.call(cmd) == 0 or subprocess.call(cmd) == 0
+    try:
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        if _depth > 0:
+            # limit number of recursive calls to 1
+            raise CharmFetchError(e.output, ' '.join(cmd))
+
+        match = re.search(r"term agreement required: (.*)", e.output)
+        if not match:
+            os.makedirs(dest_dir)
+            raise CharmFetchError(e.output, ' '.join(cmd))
+
+        terms = match.group(1).split()
+        juju_agree(*terms)
+        charm_pull(charmstore_url, dest_dir, _depth=_depth + 1)
+
+
+def juju_agree(*terms):
+    """Run `juju agree` for the provided terms.
+
+    """
+    cmd = ['juju', 'agree', '-B', '--yes'] + list(terms)
+    log.debug(' '.join(cmd))
+    try:
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        raise CharmFetchError(e.output, ' '.join(cmd))
 
 
 class Diff(object):

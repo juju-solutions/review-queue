@@ -1,5 +1,19 @@
 <%inherit file="../base.mako"/>
 
+<% diff_comments = revision.diff_comments %>
+<% diff, fetch_error = revision.get_diff(request.registry.settings, prior_revision=diff_revision) %>
+
+% if fetch_error:
+  <div class='alert alert-danger'>
+    <p>An error occured while fetching the charm source for this review.</p>
+    <p><strong>Command:</strong> <code>${fetch_error.cmd}</code></p>
+    <p><strong>Error: </strong><code>${str(fetch_error)}</code></p>
+    % if fetch_error.hint:
+      <p><strong>Possible Solution: </strong>${fetch_error.hint}</p>
+    % endif
+  </div>
+% endif
+
 % if request.user and request.user.is_charmer:
 <div class="pull-right">
   <form action="${request.route_url('review_update', id=review.id)}" method="post">
@@ -224,73 +238,74 @@
 
 <hr>
 
-% if revision.prior:
-<div class="pull-right">
-  % if not diff_revision:
-    All changes | <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':revision.id, 'diff_revision':revision.prior.id})}">Changes since last revision</a>
-  % else:
-    <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':revision.id})}">All changes</a> | Changes since last revision
-  % endif
-</div>
-% endif
-<h2>Source Diff</h2>
+% if diff:
+  <% changes = diff.get_changes() %>
 
-<% diff_comments = revision.diff_comments %>
-<% changes = revision.get_diff(request.registry.settings, prior_revision=diff_revision).get_changes() %>
-
-<div class="row">
-  <div class="col-md-6">
-    <div class="panel panel-default">
-      <a name="file-index"></a>
-      <div class="panel-heading">
-        <h3 class="panel-title">Files changed <span class="badge">${len(changes)}</span></h3>
-      </div>
-      <div class="panel-body">
-        <ul class="list-unstyled">
-        % for change in changes:
-          <li><a href="#${id(change)}">${change.description}</a></li>
-        % endfor
-        </ul>
-      </div>
-    </div>
+  % if revision.prior:
+  <div class="pull-right">
+    % if not diff_revision:
+      All changes | <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':revision.id, 'diff_revision':revision.prior.id})}">Changes since last revision</a>
+    % else:
+      <a href="${request.route_url('reviews_show', id=review.id, _query={'revision':revision.id})}">All changes</a> | Changes since last revision
+    % endif
   </div>
-  <div class="col-md-6">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Inline diff comments <span class="badge">${len(diff_comments)}</span></h3>
-      </div>
-      <div class="panel-body">
-        % if not diff_comments:
-          <p>No comments yet.</p>
-        % else:
+  % endif
+
+  <h2>Source Diff</h2>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <a name="file-index"></a>
+        <div class="panel-heading">
+          <h3 class="panel-title">Files changed <span class="badge">${len(changes)}</span></h3>
+        </div>
+        <div class="panel-body">
           <ul class="list-unstyled">
-          % for comment in diff_comments:
-            <li><a href="#${id(comment)}" class="truncate">${comment.text}</a></li>
+          % for change in changes:
+            <li><a href="#${id(change)}">${change.description}</a></li>
           % endfor
           </ul>
-        % endif
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Inline diff comments <span class="badge">${len(diff_comments)}</span></h3>
+        </div>
+        <div class="panel-body">
+          % if not diff_comments:
+            <p>No comments yet.</p>
+          % else:
+            <ul class="list-unstyled">
+            % for comment in diff_comments:
+              <li><a href="#${id(comment)}" class="truncate">${comment.text}</a></li>
+            % endfor
+            </ul>
+          % endif
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-% for change in changes:
-  <%
-    change_diff_comments = {}
-    for d in diff_comments:
-        if d.filename == change.description:
-            change_diff_comments.setdefault(d.line_start, []).append(d)
+  % for change in changes:
+    <%
+      change_diff_comments = {}
+      for d in diff_comments:
+          if d.filename == change.description:
+              change_diff_comments.setdefault(d.line_start, []).append(d)
 
-    diff = change.pygments_diff(change_diff_comments, context=True)
-  %>
-  % if diff:
-  <div>
-    <a href="#file-index" class="pull-right">Back to file index</a>
-    <h4><a name="${id(change)}"></a><a href="#${id(change)}">${change.description}</a></h4>
-    ${diff | n}
-  </div>
-  % endif
-% endfor
+      diff = change.pygments_diff(change_diff_comments, context=True)
+    %>
+    % if diff:
+    <div>
+      <a href="#file-index" class="pull-right">Back to file index</a>
+      <h4><a name="${id(change)}"></a><a href="#${id(change)}">${change.description}</a></h4>
+      ${diff | n}
+    </div>
+    % endif
+  % endfor
+% endif
 
 <div id="revision-id" style="display:none">${revision.id}</div>
 <div id="user-id" style="display:none">${request.user.id if request.user else ''}</div>
