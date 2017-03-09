@@ -179,6 +179,8 @@ class Review(Versioned, Base):
         remote_revisions = (
             charmstore_entity['Meta']['revision-info']['Revisions'])
         current_revision = self.latest_revision.revision_url
+        if current_revision not in remote_revisions:
+            return
         new_revisions = (
             remote_revisions[0:remote_revisions.index(current_revision)])
         if new_revisions:
