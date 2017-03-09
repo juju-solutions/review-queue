@@ -1,13 +1,11 @@
 import re
 
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.renderers import render_to_response
 from pyramid.security import Allow
 from pyramid.security import Authenticated
 from pyramid.security import Everyone
 from pyramid.view import view_config
-
-from theblues.errors import EntityNotFound
 
 from ..db import DB
 from .. import models as M
@@ -255,10 +253,13 @@ def show(request):
     """
     review = request.context
 
-    revision_id = request.params.get('revision')
+    try:
+        revision_id = int(request.params.get('revision'))
+    except ValueError:
+        raise HTTPNotFound()
     revision = (
         M.Revision.get(
-            id=int(revision_id),
+            id=revision_id,
             review_id=review.id) or review.latest_revision
         if revision_id else review.latest_revision)
 
