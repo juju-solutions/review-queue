@@ -9,7 +9,7 @@
     <div>
       <code>$ cd ~/charms/meteor</code><br>
       <code>$ charm push . cs:~tvansteenburgh/meteor</code><br>
-      <code>$ charm publish cs:~tvansteenburgh/meteor-0</code>
+      <code>$ charm release cs:~tvansteenburgh/meteor-0</code>
     </div>
   </li>
   <li>Set everyone=read pemissions on the charm, e.g.:
