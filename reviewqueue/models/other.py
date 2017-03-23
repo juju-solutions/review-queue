@@ -92,10 +92,13 @@ class RevisionTest(Base):
             'envs': self.substrate,
         }
 
-        r = requests.get(req_url, params=req_params)
-
-        if r.status_code in (200, 201):
-            self.status = 'PENDING'
+        try:
+            r = requests.get(req_url, params=req_params)
+        except requests.ConnectionError:
+            self.status = 'RETRY'
+        else:
+            if r.status_code in (200, 201):
+                self.status = 'PENDING'
 
         self.updated_at = datetime.datetime.utcnow()
 
