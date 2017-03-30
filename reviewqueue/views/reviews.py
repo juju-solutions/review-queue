@@ -253,22 +253,25 @@ def show(request):
     """
     review = request.context
 
-    try:
-        revision_id = int(request.params.get('revision'))
-    except ValueError:
-        raise HTTPNotFound()
-    revision = (
-        M.Revision.get(
-            id=revision_id,
-            review_id=review.id) or review.latest_revision
-        if revision_id else review.latest_revision)
+    if 'revision' in request.params:
+        try:
+            revision_id = int(request.params['revision'])
+        except ValueError:
+            raise HTTPNotFound()
+        revision = M.Revision.get(id=revision_id,
+                                  review_id=review.id)
+        if not revision:
+            raise HTTPNotFound()
+    else:
+        revision = review.latest_revision
 
-    diff_revision_id = request.params.get('diff_revision')
-    diff_revision = (
-        M.Revision.get(
-            id=int(diff_revision_id),
-            review_id=review.id)
-        if diff_revision_id else None)
+    try:
+        diff_revision_id = int(request.params.get('diff_revision'))
+    except (ValueError, TypeError):
+        diff_revision = None
+    else:
+        diff_revision = M.Revision.get(id=int(diff_revision_id),
+                                       review_id=review.id)
 
     substrates = request.registry.settings.get('testing.substrates', '')
     substrates = [s.strip() for s in substrates.split(',')]
